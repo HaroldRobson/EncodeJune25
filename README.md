@@ -21,6 +21,7 @@ The entire application is stateless aside from the database. Static HTML files a
 - **Web Server:** Nginx
 - **Database:** PostgreSQL
 - **Containerization:** Docker & Docker Compose (Self Hosted on Debian)
+- **Vibe Coding** We used ACI's VibeOps platform in cursor to make the web pages.
 
 ## Project Structure
 
