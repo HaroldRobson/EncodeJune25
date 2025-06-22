@@ -20,7 +20,7 @@ The entire application is stateless aside from the database. Static HTML files a
 - **Frontend:** HTML, CSS, JavaScript
 - **Web Server:** Nginx
 - **Database:** PostgreSQL
-- **Containerization:** Docker & Docker Compose
+- **Containerization:** Docker & Docker Compose (Self Hosted on Debian)
 
 ## Project Structure
 
@@ -57,14 +57,14 @@ The application is fully containerized. To get it running, you need to start the
 
 ### 1. Start the Backend
 
-The backend consists of the Go API and the PostgreSQL database.
+The backend consists of the Go API and the PostgreSQL database. Note that the webpages use the exposed (ngrok) api - not a local (8080) one.
 
 ```bash
 # Navigate to the backend directory
 cd EncodeHackathon
 
 # Build and start the containers in detached mode
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ### 2. Start the Frontend
@@ -76,7 +76,7 @@ The frontend is a static site served by Nginx.
 cd EncodeHackathonWebDev
 
 # Build and start the container in detached mode
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ### 3. Access the Application
