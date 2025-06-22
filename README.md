@@ -27,7 +27,7 @@ The entire application is stateless aside from the database. Static HTML files a
 
 The project is divided into two main components:
 
-- `EncodeHackathon/`: Contains the backend Go API, PostgreSQL database setup, and related Docker configurations.
+- `EncodeHackathon/`: Contains the backend Go API, PostgreSQL database setup, and related Docker configurations. 
 - `EncodeHackathonWebDev/`: Contains the frontend static website (HTML, CSS, JS) and the Nginx server configuration.
 
 ```
@@ -59,7 +59,7 @@ The application is fully containerized. To get it running, you need to start the
 ### 1. Start the Backend
 
 The backend consists of the Go API and the PostgreSQL database. Note that the webpages use the exposed (ngrok) api - not a local (8080) one.
-This is not an issue except for auth0 redirect - if you go to http://localhost:8080/?parent_id=1 you can bypass auth0.
+This is not an issue except for auth0 redirect - if you go to http://localhost:8081/parent-portal/?parent_id=2 you can bypass auth0.
 
 ```bash
 # Navigate to the backend directory
