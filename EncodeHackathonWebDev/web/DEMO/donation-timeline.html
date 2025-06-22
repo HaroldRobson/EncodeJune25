@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Donation Timeline</title>
+    <style>
+        /* =====================================================
+           BIRTHDAY DONATION TIMELINE - STANDALONE HTML PAGE
+           ===================================================== */
+        
+        /* CSS Variables for Color Palette */
+        :root {
+            --color-background: #FFFBF5;
+            --color-text: #4A443D;
+            --color-primary: #E87A5D;
+            --color-primary-hover: #D96C4E;
+            --color-accent: #F3B869;
+            --color-border: #EAE2D8;
+            --color-success: #70A9A1;
+            --color-error: #E56B6F;
+        }
+
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--color-text);
+            background-color: var(--color-background);
+            overflow-x: hidden;
+        }
+
+        /* Headings */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+        }
+
+        /* Kalam font for handwritten text */
+        @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@300;400;700&display=swap');
+
+        /* Remove Inter font import */
+        /* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap'); */
+
+        /* Paper texture background */
+        .paper-texture {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23EAE2D8' fill-opacity='0.5'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        /* Loading screen */
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--color-background);
+            position: relative;
+            z-index: 10;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--color-border);
+            border-top: 4px solid var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--color-text);
+            font-size: 18px;
+            font-weight: 400;
+        }
+
+        /* Error screen */
+        .error-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .error-icon {
+            font-size: 64px;
+            color: var(--color-error);
+            margin-bottom: 20px;
+        }
+
+        .error-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            font-size: 16px;
+            color: var(--color-text);
+            max-width: 500px;
+        }
+
+        /* Main content container */
+        .main-content {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+        }
+
+        /* Header section */
+        .header {
+            text-align: center;
+            padding: 64px 24px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .header-title {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 300;
+            margin-bottom: 24px;
+            color: var(--color-text);
+            letter-spacing: -0.02em;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease-out forwards;
+        }
+
+        .header-subtitle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 32px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease-out 0.3s forwards;
+        }
+
+        .header-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--color-primary);
+            border-radius: 50%;
+        }
+
+        .header-subtitle-text {
+            font-size: 18px;
+            color: var(--color-text);
+            font-weight: 400;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Timeline container */
+        .timeline-container {
+            max-width: 1152px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Timeline section */
+        .timeline-section {
+            margin-bottom: 128px;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease-out;
+        }
+
+        .timeline-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Donation section */
+        .donation-section {
+            margin-bottom: 80px;
+        }
+
+        .donation-grid {
+            display: grid;
+            gap: 32px;
+            align-items: start;
+        }
+
+        .donation-grid.has-video {
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 1024px) {
+            .donation-grid.has-video {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        /* Donation content */
+        .donation-content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .donation-amount-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .donation-amount-badge {
+            background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+            padding: 12px 24px;
+            border-radius: 9999px;
+            border: 1px solid var(--color-primary);
+        }
+
+        .donation-amount-text {
+            font-size: 24px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .donation-date {
+            font-size: 14px;
+            color: var(--color-text);
+        }
+
+        /* Remove the card styling from donation message */
+        .donation-message-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .donation-message-text {
+            font-size: clamp(24px, 5vw, 48px);
+            line-height: 1.2;
+            color: var(--color-text);
+            font-weight: 300;
+            letter-spacing: -0.01em;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+        }
+
+        @media (min-width: 768px) {
+            .donation-message-text {
+                font-size: clamp(28px, 4vw, 40px);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .donation-message-text {
+                font-size: clamp(32px, 4vw, 48px);
+            }
+        }
+
+        .donation-donor-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .donor-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--color-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--color-text);
+        }
+
+        .donor-name {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--color-text);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        /* Video player */
+        .video-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 1px solid var(--color-border);
+            transition: transform 0.3s ease;
+            position: relative;
+        }
+
+        .video-card:hover {
+            transform: scale(1.05);
+        }
+
+        .video-player-container {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .video-player {
+            width: 100%;
+            height: 256px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        /* Only show expand button on hover */
+        .video-expand-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-card:hover .video-expand-overlay {
+            opacity: 1;
+        }
+
+        .expand-button {
+            background: white;
+            border-radius: 50%;
+            padding: 12px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .expand-button:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .expand-button svg {
+            stroke: var(--color-primary);
+        }
+
+        .video-caption {
+            margin-top: 12px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--color-text);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        /* Handwritten note on video */
+        .video-note {
+            position: absolute;
+            bottom: -8px;
+            right: -8px;
+            background: var(--color-accent);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+            transform: rotate(6deg);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-note-text {
+            font-size: 12px;
+            font-family: 'Kalam', cursive;
+            color: var(--color-text);
+        }
+
+        /* Milestone sections */
+        .milestone-section {
+            margin: 128px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background gradient line */
+        .milestone-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--color-primary), transparent);
+            transform: translateY(-50%);
+        }
+
+        /* Central milestone content */
+        .milestone-content {
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        .milestone-card {
+            background: white;
+            padding: 48px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            position: relative;
+            text-align: center;
+        }
+
+        .milestone-amount {
+            font-size: clamp(4rem, 8vw, 7rem);
+            font-weight: 200;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+        }
+
+        .milestone-title {
+            font-size: 24px;
+            font-weight: 300;
+            color: var(--color-text);
+            margin-bottom: 12px;
+            font-family: Georgia, 'Times New Roman', Times, serif;
+        }
+
+        .milestone-subtitle {
+            font-size: 16px;
+            color: var(--color-text);
+            max-width: 384px;
+            margin: 0 auto;
+            line-height: 1.6;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        /* Decorative dots */
+        .milestone-dot-left,
+        .milestone-dot-right {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            background: var(--color-primary);
+            border-radius: 50%;
+        }
+
+        .milestone-dot-left {
+            left: -12px;
+        }
+
+        .milestone-dot-right {
+            right: -12px;
+        }
+
+        /* Handwritten annotations */
+        .milestone-annotation-left,
+        .milestone-annotation-right {
+            position: absolute;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .milestone-annotation-left {
+            left: 32px;
+            top: 16px;
+            transform: rotate(-12deg);
+            background: var(--color-accent);
+        }
+
+        .milestone-annotation-right {
+            right: 32px;
+            bottom: 16px;
+            transform: rotate(6deg);
+            background: var(--color-primary);
+            color: white; /* Text on primary background */
+        }
+
+        .milestone-annotation-text {
+            font-size: 14px;
+            font-family: 'Kalam', cursive;
+            color: var(--color-text);
+        }
+
+        .milestone-annotation-right .milestone-annotation-text {
+            color: white; /* Ensure text is white on primary background */
+        }
+
+        @media (max-width: 1024px) {
+            .milestone-annotation-left,
+            .milestone-annotation-right {
+                display: none;
+            }
+        }
+
+        /* Footer summary */
+        .footer-summary {
+            text-align: center;
+            padding: 64px 24px;
+            background-color: var(--color-background);
+            position: relative;
+            z-index: 10;
+        }
+
+        .footer-title {
+            font-size: 48px;
+            font-weight: 300;
+            margin-bottom: 16px;
+            color: var(--color-text);
+            font-family: Georgia, 'Times New Roman', Times, serif;
+        }
+
+        .footer-subtitle {
+            font-size: 18px;
+            color: var(--color-text);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        /* Timeline dot indicator */
+        .timeline-dot {
+            position: absolute;
+            left: -32px;
+            top: 32px;
+            width: 12px;
+            height: 12px;
+            background-color: var(--color-primary);
+            border-radius: 50%;
+            display: none;
+        }
+
+        @media (min-width: 1024px) {
+            .timeline-dot {
+                display: block;
+            }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .header {
+                padding: 48px 16px;
+            }
+
+            .timeline-container {
+                padding: 0 16px 60px;
+            }
+
+            .timeline-section {
+                margin-bottom: 96px;
+            }
+
+            .donation-section {
+                margin-bottom: 60px;
+            }
+
+            .milestone-section {
+                padding: 40px 24px;
+                margin: 40px 0;
+            }
+
+            .milestone-title {
+                font-size: 28px;
+            }
+
+            .footer-title {
+                font-size: 36px;
+            }
+        }
+
+        /* Utility classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Debug panel (removable) */
+        .debug-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .debug-panel.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Paper texture background -->
+    <div class="paper-texture"></div>
+
+    <!-- Debug panel (toggle with 'D' key) -->
+    <div id="debug-panel" class="debug-panel hidden">
+        <div><strong>Debug Info:</strong></div>
+        <div>Event ID: <span id="debug-event-id">-</span></div>
+        <div>API Status: <span id="debug-api-status">-</span></div>
+        <div>Donations: <span id="debug-donations-count">-</span></div>
+        <div>Sections: <span id="debug-sections-count">-</span></div>
+        <div>Scroll Direction: <span id="debug-scroll-direction">-</span></div>
+    </div>
+
+    <!-- Loading screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading your birthday timeline...</div>
+    </div>
+
+    <!-- Error screen -->
+    <div id="error-screen" class="error-screen hidden">
+        <div class="error-icon">⚠️</div>
+        <div class="error-title">Something went wrong</div>
+        <div id="error-message" class="error-message"></div>
+    </div>
+
+    <!-- Main content -->
+    <div id="main-content" class="main-content hidden">
+        <!-- Header -->
+        <div class="header">
+            <h1 id="event-title" class="header-title"></h1>
+            <div class="header-subtitle">
+                <div class="header-dot"></div>
+                <div class="header-subtitle-text">A collection of birthday wishes from loved ones</div>
+                <div class="header-dot"></div>
+            </div>
+        </div>
+
+        <!-- Timeline container -->
+        <div class="timeline-container">
+            <div id="timeline-sections"></div>
+        </div>
+
+        <!-- Footer summary -->
+        <div class="footer-summary">
+            <div id="footer-total" class="footer-title"></div>
+            <div id="footer-subtitle" class="footer-subtitle"></div>
+        </div>
+    </div>
+
+    <script>
+        /*
+        =====================================================
+        BIRTHDAY DONATION TIMELINE - JAVASCRIPT FUNCTIONALITY
+        =====================================================
+        
+        This script provides the complete functionality for the donation timeline:
+        - API integration with the donations backend
+        - Dynamic content rendering
+        - Video player controls
+        - Scroll-based animations
+        - Milestone tracking
+        - Error handling and loading states
+        
+        API Integration:
+        - Fetches from: POST http://localhost:8080/api/donations/list
+        - Expects: { event_id: number }
+        - Returns: DonationsResponse with donations array and metadata
+        
+        URL Format:
+        - Requires: ?event_id=X in the URL
+        - Example: donation-timeline.html?event_id=1
+        
+        Features:
+        - Responsive design matching Dribbble inspiration
+        - Video message playback with custom controls
+        - Milestone celebrations at £50, £100, £150
+        - Smooth scroll-triggered animations
+        - Error handling for network/API issues
+        - Debug panel (press 'D' to toggle)
+        */
+
+        // Application state
+        const appState = {
+            eventId: null,
+            donationsData: null,
+            timelineSections: [],
+            loading: true,
+            error: null,
+            scrollDirection: null,
+            prevScrollY: 0
+        };
+
+        // DOM elements
+        const elements = {
+            loadingScreen: document.getElementById('loading-screen'),
+            errorScreen: document.getElementById('error-screen'),
+            errorMessage: document.getElementById('error-message'),
+            mainContent: document.getElementById('main-content'),
+            eventTitle: document.getElementById('event-title'),
+            timelineSections: document.getElementById('timeline-sections'),
+            footerTotal: document.getElementById('footer-total'),
+            footerSubtitle: document.getElementById('footer-subtitle'),
+            debugPanel: document.getElementById('debug-panel'),
+            debugEventId: document.getElementById('debug-event-id'),
+            debugApiStatus: document.getElementById('debug-api-status'),
+            debugDonationsCount: document.getElementById('debug-donations-count'),
+            debugSectionsCount: document.getElementById('debug-sections-count'),
+            debugScrollDirection: document.getElementById('debug-scroll-direction')
+        };
+
+        // Utility functions
+        function formatCurrency(pence) {
+            return `£${(pence / 100).toFixed(0)}`;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function formatVideoTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function getVideoUrl(videoAddress) {
+            if (videoAddress.startsWith('http')) {
+                return videoAddress;
+            }
+            return `http://localhost:8080/videos/${videoAddress}`;
+        }
+
+        function updateDebugPanel() {
+            if (elements.debugPanel.classList.contains('hidden')) return;
+            
+            elements.debugEventId.textContent = appState.eventId || '-';
+            elements.debugApiStatus.textContent = appState.error ? 'Error' : appState.loading ? 'Loading' : 'Success';
+            elements.debugDonationsCount.textContent = appState.donationsData ? appState.donationsData.approved_donations : '-';
+            elements.debugSectionsCount.textContent = appState.timelineSections.length;
+            elements.debugScrollDirection.textContent = appState.scrollDirection || 'none';
+        }
+
+        // API functions
+        async function fetchDonations(eventId) {
+            console.log('Fetching donations for event_id:', eventId);
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/donations/list', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ event_id: eventId })
+                });
+
+                console.log('API Response status:', response.status);
+
+                if (response.status === 400) {
+                    throw new Error('Invalid request format');
+                }
+                
+                if (response.status === 404) {
+                    throw new Error('Event not found');
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Received donations data:', data);
+
+                return data;
+            } catch (error) {
+                console.error('API Error:', error);
+                
+                // Fallback to sample data for demo
+                if (error.message.includes('fetch')) {
+                    console.log('API unavailable, using sample data for demo');
+                    return {
+                        donations: [
+                            {
+                                id: 123,
+                                message: "Happy birthday sweetheart! Hope your special day is filled with joy, laughter, and all your favorite things! 🎂✨",
+                                donor_name: "Grandma",
+                                amount_pence: 2500,
+                                approved: true,
+                                event_id: eventId,
+                                created_at: "2025-06-20T15:30:00Z",
+                                video_address: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                            },
+                            {
+                                id: 124,
+                                message: "Wishing you the happiest of birthdays! You're growing up to be such an amazing person! 🎉",
+                                donor_name: "Uncle Bob",
+                                amount_pence: 1000,
+                                approved: true,
+                                event_id: eventId,
+                                created_at: "2025-06-20T16:15:00Z",
+                                video_address: null
+                            },
+                            {
+                                id: 125,
+                                message: "Happy birthday to our favorite little star! Hope your day is magical! ⭐🎈",
+                                donor_name: "The Johnson Family",
+                                amount_pence: 1500,
+                                approved: true,
+                                event_id: eventId,
+                                created_at: "2025-06-20T17:00:00Z",
+                                video_address: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+                            },
+                            {
+                                id: 126,
+                                message: "Wishing you a birthday as special as you are! Love you lots and can't wait to celebrate with you soon! 💖",
+                                donor_name: "Cousin Emma",
+                                amount_pence: 1000,
+                                approved: true,
+                                event_id: eventId,
+                                created_at: "2025-06-20T18:00:00Z",
+                                video_address: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"
+                            },
+                            {
+                                id: 127,
+                                message: "Happy birthday to the sweetest, smartest, most creative girl I know! Hope your day is filled with cake, presents, and lots of fun! 🍰🎁",
+                                donor_name: "Teacher Ms. Smith",
+                                amount_pence: 1500,
+                                approved: true,
+                                event_id: eventId,
+                                created_at: "2025-06-20T19:30:00Z",
+                                video_address: null
+                            },
+                            {
+                                id: 128,
+                                message: "You're growing up so fast and becoming such an amazing young person! Have an incredible birthday celebration! 🎊",
+                                donor_name: "Family Friend Mike",
+                                amount_pence: 2500,
+                                approved: true,
+                                event_id: eventId,
+                                created_at: "2025-06-20T20:15:00Z",
+                                video_address: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"
+                            },
+                            {
+                                id: 129,
+                                message: "Sending you the biggest birthday wishes from across the miles! Hope your special day is everything you dreamed of! ✨🎂",
+                                donor_name: "Aunt Linda",
+                                amount_pence: 1800,
+                                approved: true,
+                                event_id: eventId,
+                                created_at: "2025-06-20T21:00:00Z",
+                                video_address: null
+                            },
+                            {
+                                id: 130,
+                                message: "Happy birthday beautiful! May this new year bring you joy, adventure, and all the happiness in the world! 🌈🎈",
+                                donor_name: "Godmother Lucy",
+                                amount_pence: 4000,
+                                approved: true,
+                                event_id: eventId,
+                                created_at: "2025-06-20T21:45:00Z",
+                                video_address: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
+                            }
+                        ],
+                        total_donations: 8,
+                        approved_donations: 8,
+                        pending_donations: 0,
+                        total_amount_pence: 15800,
+                        approved_amount_pence: 15800,
+                        event_name: "Emma's 8th Birthday",
+                        child_name: "Emma"
+                    };
+                }
+                
+                throw error;
+            }
+        }
+
+        // Content generation functions
+        function generateTimelineSections(donationsData) {
+            const approvedDonations = donationsData.donations
+                .filter(d => d.approved)
+                .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+            const sections = [];
+            let runningTotal = 0;
+
+            // Group donations into sections (2 donations per section)
+            for (let i = 0; i < approvedDonations.length; i += 2) {
+                const sectionDonations = approvedDonations.slice(i, i + 2);
+                const sectionAmount = sectionDonations.reduce((sum, d) => sum + d.amount_pence, 0);
+                runningTotal += sectionAmount;
+
+                sections.push({
+                    id: `donation-group-${i}`,
+                    type: 'donation-group',
+                    content: {
+                        donations: sectionDonations,
+                        sectionNumber: Math.floor(i / 2) + 1,
+                        timestamp: sectionDonations[0].created_at
+                    }
+                });
+
+                // Add milestones
+                if (runningTotal >= 5000 && (runningTotal - sectionAmount) < 5000) {
+                    sections.push({
+                        id: 'milestone-50',
+                        type: 'milestone',
+                        content: {
+                            amount: 5000,
+                            title: "£50 Milestone",
+                            subtitle: `The birthday fund is growing beautifully! ${donationsData.child_name}'s special day is becoming even more magical.`,
+                            totalRaised: runningTotal
+                        }
+                    });
+                }
+
+                if (runningTotal >= 10000 && (runningTotal - sectionAmount) < 10000) {
+                    sections.push({
+                        id: 'milestone-100',
+                        type: 'milestone',
+                        content: {
+                            amount: 10000,
+                            title: "£100 Milestone",
+                            subtitle: `Incredible! The love and generosity from family and friends continues to pour in for ${donationsData.child_name}.`,
+                            totalRaised: runningTotal
+                        }
+                    });
+                }
+
+                if (runningTotal >= 15000 && (runningTotal - sectionAmount) < 15000) {
+                    sections.push({
+                        id: 'milestone-150',
+                        type: 'milestone',
+                        content: {
+                            amount: 15000,
+                            title: "£150 Milestone",
+                            subtitle: `Amazing! This birthday celebration is becoming truly unforgettable thanks to everyone's wonderful contributions.`,
+                            totalRaised: runningTotal
+                        }
+                    });
+                }
+            }
+
+            return sections;
+        }
+
+        function createVideoPlayer(videoUrl, donorName) {
+            const videoId = `video-${Math.random().toString(36).substr(2, 9)}`;
+            
+            return `
+                <div class="video-card">
+                    <div class="video-player-container" onclick="expandVideo('${videoId}', '${videoUrl}', '${donorName}')">
+                        <video 
+                            id="${videoId}"
+                            class="video-player"
+                            autoplay
+                            muted
+                            loop
+                            preload="metadata"
+                        >
+                            <source src="${videoUrl}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        
+                        <div class="video-expand-overlay">
+                            <button class="expand-button">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="2">
+                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="video-caption">
+                        Video message from ${donorName}
+                    </div>
+                    
+                    <div class="video-note">
+                        <div class="video-note-text">So sweet! 💕</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createDonationSection(donation, hasVideo) {
+            const videoPlayer = hasVideo ? createVideoPlayer(getVideoUrl(donation.video_address), donation.donor_name) : '';
+            
+            return `
+                <div class="donation-section">
+                    <div class="donation-grid ${hasVideo ? 'has-video' : ''}">
+                        <div class="donation-content">
+                            <div class="donation-amount-row">
+                                <div class="donation-amount-badge">
+                                    <div class="donation-amount-text">${formatCurrency(donation.amount_pence)}</div>
+                                </div>
+                                <div class="donation-date">${formatDate(donation.created_at)}</div>
+                            </div>
+                            
+                            <div class="donation-message-container">
+                                <div class="donation-message-text">"${donation.message}"</div>
+                                <div class="donation-donor-info">
+                                    <div class="donor-avatar">${donation.donor_name.charAt(0)}</div>
+                                    <div class="donor-name">${donation.donor_name}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${hasVideo ? `<div>${videoPlayer}</div>` : ''}
+                    </div>
+                    
+                    <div class="timeline-dot"></div>
+                </div>
+            `;
+        }
+
+        function createMilestoneSection(milestone) {
+            return `
+                <div class="milestone-section">
+                    <div class="milestone-line"></div>
+                    
+                    <div class="milestone-content">
+                        <div class="milestone-card">
+                            <div class="milestone-amount">£${(milestone.amount / 100).toFixed(0)}</div>
+                            <div class="milestone-title">${milestone.title}</div>
+                            <div class="milestone-subtitle">${milestone.subtitle}</div>
+                            
+                            <div class="milestone-dot-left"></div>
+                            <div class="milestone-dot-right"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="milestone-annotation-left">
+                        <div class="milestone-annotation-text">Incredible! ✨</div>
+                    </div>
+                    
+                    <div class="milestone-annotation-right">
+                        <div class="milestone-annotation-text">Keep going! 🎉</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Video expansion functionality
+        function expandVideo(videoId, videoUrl, donorName) {
+            // Create fullscreen modal
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                inset: 0;
+                z-index: 50;
+                background: rgba(0, 0, 0, 0.9);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 16px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="position: relative; max-width: 64rem; width: 100%;">
+                    <button onclick="closeVideoModal()" style="
+                        position: absolute;
+                        top: -48px;
+                        right: 0;
+                        color: white;
+                        background: none;
+                        border: none;
+                        cursor: pointer;
+                        font-size: 24px;
+                        transition: color 0.3s ease;
+                    " onmouseover="this.style.color='#d1d5db'" onmouseout="this.style.color='white'">
+                        <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                    
+                    <div style="
+                        position: relative;
+                        background: black;
+                        border-radius: 8px;
+                        overflow: hidden;
+                    ">
+                        <video 
+                            autoplay
+                            controls
+                            style="width: 100%; height: auto; max-height: 70vh;"
+                        >
+                            <source src="${videoUrl}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            modal.id = 'video-modal';
+            
+            // Close on background click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeVideoModal();
+                }
+            });
+        }
+
+        function closeVideoModal() {
+            const modal = document.getElementById('video-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // Rendering functions
+        function renderTimelineSections() {
+            const container = elements.timelineSections;
+            container.innerHTML = '';
+
+            appState.timelineSections.forEach((section, index) => {
+                const sectionElement = document.createElement('div');
+                sectionElement.className = 'timeline-section';
+                sectionElement.style.animationDelay = `${index * 0.15}s`;
+                
+                if (section.type === 'donation-group') {
+                    section.content.donations.forEach((donation) => {
+                        const hasVideo = donation.video_address !== null;
+                        sectionElement.innerHTML += createDonationSection(donation, hasVideo);
+                    });
+                } else if (section.type === 'milestone') {
+                    sectionElement.innerHTML = createMilestoneSection(section.content);
+                }
+                
+                container.appendChild(sectionElement);
+            });
+
+            // Set up intersection observer for animations
+            setupScrollAnimations();
+        }
+
+        function setupScrollAnimations() {
+            const sections = document.querySelectorAll('.timeline-section');
+            
+            sections.forEach(section => {
+                let hasRevealed = false;
+                
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            // If element is in view
+                            if (appState.scrollDirection === 'down' || appState.scrollDirection === null) {
+                                // If scrolling down OR initial load (null direction), and it enters view, reveal it.
+                                hasRevealed = true;
+                                entry.target.classList.add('visible');
+                            }
+                        } else {
+                            // If element is out of view
+                            // Check if it's out of view below the viewport
+                            const rect = entry.target.getBoundingClientRect();
+                            if (rect.top > window.innerHeight) {
+                                // If it's out of view AND below the viewport, reset hasRevealed
+                                // so it can animate again when scrolled down to.
+                                hasRevealed = false;
+                                entry.target.classList.remove('visible');
+                            }
+                            // If it's out of view above the viewport, do not reset hasRevealed. (i.e. hasRevealed remains true)
+                        }
+                    });
+                }, {
+                    threshold: 0.1,
+                    rootMargin: '0px 0px -50px 0px'
+                });
+
+                observer.observe(section);
+            });
+        }
+
+        // State management
+        function showLoading() {
+            elements.loadingScreen.classList.remove('hidden');
+            elements.errorScreen.classList.add('hidden');
+            elements.mainContent.classList.add('hidden');
+        }
+
+        function showError(message) {
+            elements.loadingScreen.classList.add('hidden');
+            elements.errorScreen.classList.remove('hidden');
+            elements.mainContent.classList.add('hidden');
+            elements.errorMessage.textContent = message;
+            appState.error = message;
+            updateDebugPanel();
+        }
+
+        function showContent() {
+            elements.loadingScreen.classList.add('hidden');
+            elements.errorScreen.classList.add('hidden');
+            elements.mainContent.classList.remove('hidden');
+            
+            // Update content
+            elements.eventTitle.textContent = appState.donationsData.event_name;
+            elements.footerTotal.textContent = `${formatCurrency(appState.donationsData.approved_amount_pence)} raised`;
+            elements.footerSubtitle.textContent = `from ${appState.donationsData.approved_donations} wonderful contributors`;
+            
+            // Render timeline
+            renderTimelineSections();
+            
+            appState.loading = false;
+            appState.error = null;
+            updateDebugPanel();
+        }
+
+        // Scroll direction tracking
+        function setupScrollTracking() {
+            window.addEventListener('scroll', () => {
+                const currentScrollY = window.scrollY;
+                if (currentScrollY > appState.prevScrollY) {
+                    appState.scrollDirection = 'down';
+                } else if (currentScrollY < appState.prevScrollY) {
+                    appState.scrollDirection = 'up';
+                }
+                appState.prevScrollY = currentScrollY;
+                updateDebugPanel();
+            });
+        }
+
+        // Debug functionality
+        function setupDebugControls() {
+            document.addEventListener('keydown', (e) => {
+                if (e.key.toLowerCase() === 'd') {
+                    elements.debugPanel.classList.toggle('hidden');
+                }
+            });
+        }
+
+        // Main initialization
+        async function init() {
+            try {
+                // Get event_id from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const eventIdParam = urlParams.get('event_id');
+                
+                if (!eventIdParam) {
+                    throw new Error('event_id is required in the URL query parameter. Example: ?event_id=1');
+                }
+
+                const eventId = parseInt(eventIdParam);
+                if (isNaN(eventId)) {
+                    throw new Error('event_id must be a valid number');
+                }
+
+                appState.eventId = eventId;
+                updateDebugPanel();
+
+                console.log('Initializing donation timeline for event_id:', eventId);
+
+                // Fetch donations data
+                const donationsData = await fetchDonations(eventId);
+                appState.donationsData = donationsData;
+
+                // Generate timeline sections
+                appState.timelineSections = generateTimelineSections(donationsData);
+
+                // Show content
+                showContent();
+
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showError(error.message);
+            }
+        }
+
+        // Start the application
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎂 Birthday Donation Timeline - Starting Application');
+            setupScrollTracking();
+            setupDebugControls();
+            updateDebugPanel();
+            init();
+        });
+
+        // Global functions
+        window.expandVideo = expandVideo;
+        window.closeVideoModal = closeVideoModal;
+    </script>
+</body>
+</html>
+
+<!--
+=====================================================
+BIRTHDAY DONATION TIMELINE - DOCUMENTATION
+=====================================================
+
+OVERVIEW:
+This is a complete standalone HTML file that replicates the full functionality
+of the React-based donation timeline. It can be served as a static file and
+requires only the backend API to be running.
+
+FEATURES:
+✅ Beautiful Dribbble-inspired design with handwritten fonts
+✅ Complete API integration with donation backend
+✅ Video message playback with custom controls
+✅ Scroll-based animations and timeline layout  
+✅ Milestone celebrations at £50, £100, £150
+✅ Responsive design for desktop, tablet, mobile
+✅ Error handling and loading states
+✅ Fallback sample data when API unavailable
+✅ Debug panel for development (press 'D' to toggle)
+
+USAGE:
+1. Place this file in your web directory
+2. Ensure your API is running at http://localhost:8080
+3. Access with event_id parameter: donation-timeline.html?event_id=1
+4. The page will fetch and display donations for that event
+
+API INTEGRATION:
+- Endpoint: POST http://localhost:8080/api/donations/list
+- Payload: { event_id: number }
+- Fallback: Uses sample data if API unavailable
+
+VIDEO SUPPORT:
+- Supports video messages from donors
+- Custom video controls with play/pause, mute, progress bar
+- Video URLs can be relative (served by API) or absolute (external)
+
+ANIMATIONS:
+- Header fades in on page load
+- Timeline sections appear as user scrolls down
+- Smooth transitions and hover effects
+- Milestone celebrations with floating animations
+
+RESPONSIVE DESIGN:
+- Mobile-first approach with breakpoints
+- Flexible grid layout for donations with/without videos  
+- Touch-friendly controls on mobile devices
+
+CUSTOMIZATION:
+- All styles are contained in the <style> section
+- Color scheme uses orange/warm palette matching design
+- Fonts: Inter for modern text, Kalam for handwritten elements
+- Easy to modify milestone thresholds in generateTimelineSections()
+
+DEPLOYMENT:
+- No build process required - just serve as static HTML
+- Works with any web server (nginx, Apache, GitHub Pages, etc.)
+- No Node.js runtime needed for frontend
+- Backend API still required for dynamic data
+
+BROWSER SUPPORT:
+- Modern browsers supporting ES6, CSS Grid, Flexbox
+- Video element with MP4 support
+- Intersection Observer API for scroll animations
+- Fetch API for HTTP requests
+
+SECURITY:
+- No server-side code execution
+- Safe to serve from static hosting
+- API calls respect CORS if cross-domain
+- No sensitive data stored in frontend
+
+This file demonstrates how modern web apps can be built without complex
+frameworks while maintaining full functionality and beautiful design.
+--> 

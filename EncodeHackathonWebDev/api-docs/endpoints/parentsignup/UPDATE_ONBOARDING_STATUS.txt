@@ -1,0 +1,102 @@
+# Update Onboarding Status
+
+## Request:
+```bash
+curl -X POST http://localhost:8080/api/payments/onboarding-complete \
+  -H "Content-Type: application/json" \
+  -d '{
+    "stripe_connect_account_id": "acct_1RcGBtQiBhjRUgiO"
+  }'
+```
+
+## Response:
+```json
+{
+  "account_id": 456,
+  "parent_id": 123,
+  "stripe_connect_account_id": "acct_1RcGBtQiBhjRUgiO",
+  "onboarding_complete": true,
+  "message": "Onboarding completed successfully. Account can now receive payments."
+}
+```
+
+## Response (Already Complete):
+```json
+{
+  "account_id": 456,
+  "parent_id": 123,
+  "stripe_connect_account_id": "acct_1RcGBtQiBhjRUgiO",
+  "onboarding_complete": true,
+  "message": "Onboarding was already complete"
+}
+```
+
+## Required Fields:
+- `stripe_connect_account_id` - Stripe account ID that completed onboarding
+
+## Frontend Integration Flow:
+1. **Parent** completes Stripe onboarding forms
+2. **Stripe** redirects to: `localhost:3000/return?account=acct_xxx`
+3. **Frontend** extracts account ID from URL parameters
+4. **Frontend** calls this endpoint to mark onboarding complete
+5. **Parent** can now receive donations
+
+## Return URL Setup:
+Configure in Stripe account creation:
+```javascript
+// When creating account link
+const accountLink = await stripe.accountLinks.create({
+  account: 'acct_xxx',
+  refresh_url: 'http://localhost:3000/reauth',
+  return_url: 'http://localhost:3000/return',
+  type: 'account_onboarding',
+});
+```
+
+## Frontend Return Page:
+```javascript
+// Example return page handling
+const urlParams = new URLSearchParams(window.location.search);
+const accountId = urlParams.get('account');
+
+if (accountId) {
+  // Call our API to mark complete
+  fetch('/api/payments/onboarding-complete', {
+    method: 'POST',
+    body: JSON.stringify({
+      stripe_connect_account_id: accountId
+    })
+  });
+}
+```
+
+## Error Messages:
+
+**400 Bad Request:**
+- `"Invalid request format"` - Missing account ID or invalid JSON
+- `"Invalid Stripe account ID format. Should start with 'acct_'"` - Malformed account ID
+
+**404 Not Found:**
+- `"Stripe account not found"` - Account ID doesn't exist in our database
+
+**500 Internal Server Error:**
+- `"Database query failed"` - Database connection issues
+- `"Failed to update onboarding status"` - Update operation failed
+
+## Benefits:
+- **Simple integration** - No webhooks needed for MVP
+- **Immediate feedback** - Parent knows onboarding worked
+- **Idempotent** - Safe to call multiple times
+- **Status tracking** - Clear onboarding state management
+
+## Production Considerations:
+- Use HTTPS URLs for return/refresh
+- Add authentication to verify parent owns the account
+- Consider webhooks for more reliable status updates
+- Handle edge cases (user closes browser, network issues)
+
+## Next Steps:
+After onboarding complete:
+1. Parent can create birthday events
+2. Donation flow can process payments
+3. Funds go directly to parent's verified account

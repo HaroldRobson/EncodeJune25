@@ -1,0 +1,59 @@
+# Create Event
+
+## Request:
+```bash
+curl -X POST http://localhost:8080/api/events/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "child_id": 1,
+    "event_name": "Emma'\''s 9th Birthday Party",
+    "expires_at": "2026-07-15",
+    "event_message": "Emma is turning 9! Let'\''s make it the best birthday ever!",
+    "videos_enabled": true,
+    "photo_address": "https://example.com/emma-9th.jpg"
+  }'
+```
+
+## Response:
+```json
+{
+  "event_id": 123,
+  "event_name": "Emma's 9th Birthday Party",
+  "child_name": "Emma",
+  "message": "Event created successfully"
+}
+```
+
+## Required Fields:
+- `child_id` - Which child the event is for
+- `event_name` - Name of the birthday event
+- `expires_at` - When donations close (YYYY-MM-DD format)
+
+## Optional Fields:
+- `event_message` - Custom message from parents
+- `videos_enabled` - Allow video messages (default: false)
+- `photo_address` - URL to child's photo
+
+## Validation Rules:
+- Expiry date must be in the future
+- Expiry date cannot be more than 2 years away
+- Child must exist
+- Cannot have duplicate active event names for same child
+
+## Error Messages:
+
+**400 Bad Request:**
+- `"Invalid request format"` - Missing required fields or invalid JSON
+- `"Invalid date format. Use YYYY-MM-DD (e.g., 2025-07-15)"` - Wrong date format
+- `"Expiry date must be in the future"` - Past date provided
+- `"Expiry date cannot be more than 2 years in the future"` - Date too far ahead
+
+**404 Not Found:**
+- `"Child not found"` - Child ID doesn't exist
+
+**409 Conflict:**
+- `"An active event with this name already exists for this child"` - Duplicate active event
+
+**500 Internal Server Error:**
+- `"Database query failed"` - Database connection issues
+- `"Failed to create event"` - Insert operation failed

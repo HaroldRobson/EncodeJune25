@@ -1,0 +1,57 @@
+# Create Child
+
+## Request:
+```bash
+curl -X POST http://localhost:8080/api/children/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "parent_id": 1,
+    "child_name": "Oliver",
+    "dob": "2020-05-15",
+    "email": "oliver@example.com"
+  }'
+```
+
+## Response:
+```json
+{
+  "child_id": 123,
+  "child_name": "Oliver",
+  "message": "Child created successfully"
+}
+```
+
+## Required Fields:
+- `parent_id` - Parent's ID (from Auth0 JWT)
+- `child_name` - Child's name
+- `dob` - Date of birth (YYYY-MM-DD format)
+- `email` - Child's email (for when ISA expires at 18)
+
+## Validation Rules:
+- Must be under 18 years old
+- Date cannot be in the future
+- Email must be valid format
+- Email must be unique across all children
+- Parent must exist
+
+## Auto-calculated:
+- `isa_expiry` = 18th birthday
+- `created_at` = now
+
+## Error Messages:
+
+**400 Bad Request:**
+- `"Invalid request format"` - Missing required fields or invalid JSON
+- `"Invalid date format. Use YYYY-MM-DD (e.g., 2017-07-15)"` - Wrong date format
+- `"Date of birth cannot be in the future"` - Future date provided
+- `"Child must be under 18 years old"` - DOB more than 18 years ago
+
+**404 Not Found:**
+- `"Parent not found"` - Parent ID doesn't exist
+
+**409 Conflict:**
+- `"A child with this email already exists"` - Email already in use
+
+**500 Internal Server Error:**
+- `"Database query failed"` - Database connection issues
+- `"Failed to create child"` - Insert operation failed

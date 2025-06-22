@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Messages</title>
+    <style>
+        :root {
+            --color-background: #FFFBF5;
+            --color-text: #4A443D;
+            --color-primary: #E87A5D;
+            --color-accent: #F3B869;
+            --color-border: #EAE2D8;
+            --color-success: #70A9A1;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--color-background);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            color: var(--color-primary);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .messages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .message-card {
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .message-body {
+            font-style: italic;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            flex-grow: 1;
+        }
+        
+        .message-body::before {
+            content: '“';
+            font-size: 2em;
+            color: var(--color-accent);
+            font-weight: bold;
+            line-height: 0;
+            margin-right: 5px;
+        }
+
+        .message-footer {
+            text-align: right;
+        }
+
+        .donor-name {
+            font-weight: 600;
+            color: var(--color-text);
+        }
+        
+        .donor-name::before {
+            content: '— ';
+        }
+
+        .video-link {
+            display: inline-block;
+            background-color: var(--color-primary);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .video-link:hover {
+            background-color: #D96C4E;
+        }
+
+        .loading, .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-style: italic;
+            font-size: 1.2em;
+            /* This will make the element span all columns in the grid */
+            grid-column: 1 / -1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 id="page-title">Messages for You!</h1>
+        
+        <div id="loading" class="loading">
+            Loading your messages...
+        </div>
+        
+        <div id="messages-grid" class="messages-grid">
+            <!-- Approved messages will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        // Get parent_id from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const parentId = urlParams.get('parent_id');
+
+        if (!parentId) {
+            alert('Error: parent_id is required in the URL query parameter.');
+        }
+
+        window.addEventListener('load', async function() {
+            document.getElementById('page-title').textContent = `Your Family's Messages`;
+            document.title = `Your Messages`;
+            await loadAllApprovedDonations();
+        });
+
+        async function loadAllApprovedDonations() {
+            try {
+                // Step 1: Fetch all events for the parent
+                // Mock implementation: Using a hardcoded list of event IDs.
+                // Replace with a real API call to /api/events/list when ready.
+                
+                const eventsResponse = await fetch('https://singular-hopeful-joey.ngrok-free.app/api/events/list', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ parent_id: parseInt(parentId) })
+                });
+                if (!eventsResponse.ok) {
+                    throw new Error(`Failed to fetch events: ${eventsResponse.statusText}`);
+                }
+                const eventsData = await eventsResponse.json();
+                
+                // Handle case where there are no events
+                if (!eventsData.events || eventsData.events.length === 0) {
+                    const grid = document.getElementById('messages-grid');
+                    grid.innerHTML = `<p class="empty-state">There are no events set up for this child yet.</p>`;
+                    document.getElementById('loading').style.display = 'none';
+                    return; // Stop execution
+                }
+
+
+                const eventIds = eventsData.events.map(e => e.event_id);
+                
+                // const eventIds = [1, 2]; // Mock data
+                
+                // Step 2: Fetch donations for each event concurrently
+                const donationPromises = eventIds.map(eventId => 
+
+                    fetch(`https://singular-hopeful-joey.ngrok-free.app/api/donations/list`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ event_id: eventId })
+                    }).then(response => {
+                        if (!response.ok) {
+                            console.error(`Failed to fetch donations for event ${eventId}`);
+                            return { donations: [] }; // Return empty on error to not fail the whole process
+                        }
+                        return response.json();
+                    })
+                );
+                
+                const donationResults = await Promise.all(donationPromises);
+                
+                // Step 3: Combine all donations and filter for approved ones
+                // Safely flatMap the results, providing an empty array fallback
+                const allDonations = donationResults.flatMap(result => result?.donations || []);
+                
+                // Filter for donations that are not null and are approved
+                const approvedDonations = allDonations.filter(donation => donation && donation.approved);
+
+                displayMessages(approvedDonations);
+
+            } catch (error) {
+                console.error('Error loading donations:', error);
+                const grid = document.getElementById('messages-grid');
+                grid.innerHTML = `<p class="empty-state">Could not load messages. Please try again later.</p>`;
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function displayMessages(donations) {
+            const grid = document.getElementById('messages-grid');
+
+            if (donations.length === 0) {
+                grid.innerHTML = `<p class="empty-state">No messages have been approved yet. Check back soon!</p>`;
+                return;
+            }
+
+            grid.innerHTML = donations.map(donation => {
+                // Replace localhost in video address for production viewing
+                const videoUrl = donation.video_address
+                    ? donation.video_address.replace('http://localhost:8080', 'https://singular-hopeful-joey.ngrok-free.app')
+                    : null;
+
+                return `
+                <div class="message-card">
+                    <div class="message-body">${donation.message || 'A special gift for you!'}</div>
+                    <div class="message-footer">
+                        <div class="donor-name">${donation.donor_name}</div>
+                        ${videoUrl ? `<a href="${videoUrl}" target="_blank" class="video-link">📹 Watch Video Message</a>` : ''}
+                    </div>
+                </div>
+            `}).join('');
+        }
+    </script>
+</body>
+</html> 

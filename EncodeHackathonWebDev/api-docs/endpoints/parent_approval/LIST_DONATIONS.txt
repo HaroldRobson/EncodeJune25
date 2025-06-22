@@ -1,0 +1,70 @@
+# List Donations for Review
+
+## Request:
+```bash
+curl -X POST http://localhost:8080/api/donations/list \
+  -H "Content-Type: application/json" \
+  -d '{"event_id": 1}'
+```
+
+## Response:
+```json
+{
+  "donations": [
+    {
+      "id": 123,
+      "message": "Happy birthday Emma! You're amazing!",
+      "donor_name": "Uncle Bob",
+      "amount_pence": 500,
+      "approved": true,
+      "event_id": 1,
+      "created_at": "2025-06-20T15:30:00Z",
+      "video_address": null
+    },
+    {
+      "id": 124,
+      "message": "Hope you have the best day ever!",
+      "donor_name": "Aunt Sarah",
+      "amount_pence": 1000,
+      "approved": false,
+      "event_id": 1,
+      "created_at": "2025-06-20T16:45:00Z",
+      "video_address": "http://localhost:8080/videos/sarah_video.mp4"
+    }
+  ],
+  "total_donations": 2,
+  "approved_donations": 1,
+  "pending_donations": 1,
+  "total_amount_pence": 1500,
+  "approved_amount_pence": 500,
+  "event_name": "Emma's 8th Birthday",
+  "child_name": "Emma"
+}
+```
+
+## Required Fields:
+- `event_id` - The event to get donations for
+
+## Response Fields:
+- `donations` - Array of all donations (newest first)
+- `total_donations` - Total number of donations
+- `approved_donations` - Number of approved donations
+- `pending_donations` - Number pending review
+- `total_amount_pence` - Total money donated
+- `approved_amount_pence` - Total approved money
+- `event_name` - Name of the event
+- `child_name` - Child's name
+
+## Error Messages:
+
+**400 Bad Request:**
+- `"Invalid request format"` - Missing event_id or invalid JSON
+
+**404 Not Found:**
+- `"Event not found"` - Event ID doesn't exist
+
+**500 Internal Server Error:**
+- `"Database query failed"` - Database connection issues
+- `"Failed to query donations"` - Donations query error
+- `"Failed to scan donation data"` - Data processing error
+- `"Error processing donation data"` - Row iteration error

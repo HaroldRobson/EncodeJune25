@@ -1,0 +1,63 @@
+# Get Parent's Events
+
+## Request:
+```bash
+curl -X POST http://localhost:8080/api/events/list \
+  -H "Content-Type: application/json" \
+  -d '{"parent_id": 1}'
+```
+
+## Response:
+```json
+{
+  "events": [
+    {
+      "event_id": 1,
+      "child_id": 1,
+      "event_name": "Emma's 8th Birthday",
+      "expires_at": "2025-07-15T00:00:00Z",
+      "created_at": "2025-06-20T17:23:56Z",
+      "event_message": "Help us make Emma's birthday extra special!",
+      "videos_enabled": true,
+      "photo_address": "https://example.com/emma-photo.jpg",
+      "child_name": "Emma",
+      "is_expired": false,
+      "days_remaining": 25
+    },
+    {
+      "event_id": 2,
+      "child_id": 2,
+      "event_name": "Charlie's 10th Birthday",
+      "expires_at": "2026-12-25T00:00:00Z",
+      "created_at": "2025-06-20T18:45:12Z",
+      "event_message": "Charlie's double-digit birthday!",
+      "videos_enabled": false,
+      "photo_address": null,
+      "child_name": "Charlie",
+      "is_expired": false,
+      "days_remaining": 553
+    }
+  ],
+  "count": 2
+}
+```
+
+## Required Fields:
+- `parent_id` - The parent's ID (from Auth0 JWT token)
+
+## Response Fields:
+- `events` - Array of event objects for all parent's children
+- `count` - Total number of events
+- `is_expired` - Boolean if event has passed expiry date
+- `days_remaining` - Days until expiry (0 if expired)
+- Events sorted by expiry date (earliest first)
+
+## Error Messages:
+
+**400 Bad Request:**
+- `"Invalid request format"` - Missing parent_id or invalid JSON
+
+**500 Internal Server Error:**
+- `"Database query failed"` - Database connection issues
+- `"Failed to scan event data"` - Data processing error
+- `"Error processing event data"` - Row iteration error

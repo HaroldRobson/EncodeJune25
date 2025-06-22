@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Donations - Join The Movement</title>
+    <style>
+        :root {
+            --color-background: #FFFBF5;
+            --color-text: #4A443D;
+            --color-primary: #E87A5D;
+            --color-primary-hover: #D96C4E;
+            --color-accent: #F3B869;
+            --color-border: #EAE2D8;
+            --color-success: #70A9A1;
+            --color-error: #E56B6F;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .background-carousel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -2;
+            background-color: var(--color-background);
+        }
+
+        .background-carousel::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 251, 245, 0.6); /* Semi-transparent overlay */
+            z-index: -1;
+        }
+
+        .carousel-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            animation: imageFade 36s linear infinite;
+        }
+
+        /* Stagger the animations */
+        .carousel-image:nth-child(1) { background-image: url('picture_1.jpg'); animation-delay: 0s; }
+        .carousel-image:nth-child(2) { background-image: url('picture_2.jpg'); animation-delay: 6s; }
+        .carousel-image:nth-child(3) { background-image: url('picture_3.jpg'); animation-delay: 12s; }
+        .carousel-image:nth-child(4) { background-image: url('picture_4.jpg'); animation-delay: 18s; }
+        .carousel-image:nth-child(5) { background-image: url('picture_5.jpg'); animation-delay: 24s; }
+        .carousel-image:nth-child(6) { background-image: url('picture_6.jpg'); animation-delay: 30s; }
+
+        @keyframes imageFade {
+            0% { opacity: 0; }
+            8% { opacity: 1; } /* Fade In */
+            17% { opacity: 1; } /* Hold */
+            25% { opacity: 0; } /* Fade Out */
+            100% { opacity: 0; }
+        }
+        
+        .content-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.62); /* Subtle transparency */
+            -webkit-backdrop-filter: blur(8px); /* Frosted glass effect for Safari */
+            backdrop-filter: blur(8px); /* Frosted glass effect */
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        h1 {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            font-size: 2.5rem;
+            color: var(--color-text);
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: var(--color-text);
+            margin-bottom: 30px;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        button, .login-button {
+            background: var(--color-primary);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            box-sizing: border-box;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease;
+        }
+
+        button:hover, .login-button:hover {
+            background: var(--color-primary-hover);
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .success {
+            color: var(--color-text);
+        }
+        .success p {
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        .success .login-button {
+             background-color: var(--color-success);
+        }
+         .success .login-button:hover {
+             background-color: #5a9a91;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background-carousel">
+        <div class="carousel-image"></div>
+        <div class="carousel-image"></div>
+        <div class="carousel-image"></div>
+        <div class="carousel-image"></div>
+        <div class="carousel-image"></div>
+        <div class="carousel-image"></div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="form-container">
+            <h1>A Letter Ahead</h1>
+            <p>Create lasting memories and build your child's financial future.</p>
+            
+            <iframe name="hidden-iframe" id="hidden-iframe" style="display:none;"></iframe>
+            
+            <form id="waitlist-form" action="https://script.google.com/macros/s/AKfycbzsAY_b4Hk-NKH1HLc6rM8klI1_mvlpAAtlZu9nxM4Y314fLJYGUBw7kHZQ7m2s8sVV2Q/exec" method="POST" target="hidden-iframe">
+                <input type="email" name="email" placeholder="Your email address" required>
+                <input type="text" name="name" placeholder="Your name (optional)">
+                <button type="submit">Join the Movement</button>
+            </form>
+            
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('waitlist-form').addEventListener('submit', function(e) {
+            const emailInput = e.target.querySelector('input[name="email"]');
+            if (!emailInput.value) return;
+
+            const userEmail = encodeURIComponent(emailInput.value);
+            const loginUrl = `/sign-in/?user_email=${userEmail}`;
+
+            // Give the form time to start submitting before we alter the DOM
+            setTimeout(() => {
+                const form = document.getElementById('waitlist-form');
+                const messageDiv = document.getElementById('message');
+                
+                form.style.display = 'none';
+
+                messageDiv.innerHTML = `
+                    <div class="success">
+                        <p style="font-size: 1.5rem; font-weight: bold;">🎉 Thanks! You're on the waitlist!</p>
+                        <p>To continue to your dashboard, please click the button below.</p>
+                        <a href="${loginUrl}" class="login-button">Continue to Login</a>
+                    </div>
+                `;
+            }, 300);
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Portal</title>
+    <style>
+        /* Shared styles for encode website - Warm Style Guide */
+:root {
+    --color-background: #FFFBF5;
+    --color-text: #4A443D;
+    --color-primary: #E87A5D;
+    --color-primary-hover: #D96C4E;
+    --color-accent: #F3B869;
+    --color-border: #EAE2D8;
+    --color-success: #70A9A1;
+    --color-error: #E56B6F;
+}
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: var(--color-background);
+    color: var(--color-text);
+    line-height: 1.6;
+}
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+h1, h2, h3 {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    color: var(--color-text);
+    margin-bottom: 20px;
+}
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.2em;
+}
+h2 {
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+/* Grid layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 40px;
+}
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* Section cards */
+.section-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--color-border);
+}
+.section-title {
+    font-size: 1.4em;
+    font-weight: 600;
+    color: var(--color-text);
+}
+/* Children list */
+.child-item {
+    background: rgba(243, 184, 105, 0.1);
+    border: 1px solid var(--color-accent);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: box-shadow 0.2s ease-in-out;
+}
+.child-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.child-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.child-name {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--color-text);
+}
+.child-id {
+    background: var(--color-primary);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+}
+.child-details {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+.child-actions {
+    display: flex;
+    gap: 10px;
+}
+/* Events list */
+.event-item {
+    background: rgba(234, 226, 216, 0.3);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: box-shadow 0.2s ease-in-out;
+}
+.event-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.event-name {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--color-text);
+}
+.event-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.status-active {
+    background: rgba(112, 169, 161, 0.2);
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
+}
+.status-expired {
+    background: rgba(229, 107, 111, 0.2);
+    color: var(--color-error);
+    border: 1px solid var(--color-error);
+}
+.event-details {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 15px;
+}
+.event-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: #888;
+}
+/* Form styles */
+.form-group {
+    margin-bottom: 20px;
+}
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--color-text);
+    font-size: 14px;
+}
+input[type="text"], 
+input[type="date"], 
+input[type="email"],
+textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+    background: white;
+    color: var(--color-text);
+    transition: border-color 0.2s ease-in-out;
+}
+input[type="text"]:focus, 
+input[type="date"]:focus, 
+input[type="email"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(232, 122, 93, 0.1);
+}
+/* Button styles */
+button {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background-color 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+button:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+button:disabled {
+    background-color: var(--color-border);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+button.secondary {
+    background-color: var(--color-border);
+    color: var(--color-text);
+}
+button.secondary:hover {
+    background-color: #d4c8bc;
+}
+/* Link styles */
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+a:hover {
+    color: var(--color-primary-hover);
+    text-decoration: underline;
+}
+/* Loading and error states */
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--color-text);
+    font-style: italic;
+}
+.error {
+    background-color: rgba(229, 107, 111, 0.1);
+    border: 1px solid var(--color-error);
+    color: #8b2d31;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+.success {
+    background-color: rgba(112, 169, 161, 0.1);
+    border: 1px solid var(--color-success);
+    color: #2d5a54;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+/* Responsive design */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        padding: 20px;
+    }
+    
+    .child-header,
+    .event-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .child-actions {
+        flex-direction: column;
+    }
+    
+    .event-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Parent Portal</h1>
+        
+        <div id="loading" class="loading">
+            Loading your dashboard...
+        </div>
+        
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="success" class="success" style="display: none;"></div>
+        
+        <div id="content" style="display: none;">
+            <div class="dashboard-grid">
+                <!-- Children Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">Your Children</h2>
+                        <button onclick="toggleCreateChildForm()" class="secondary">+ Add Child</button>
+                    </div>
+                    
+                    <div id="create-child-form" style="display: none; margin-bottom: 20px;">
+                        <h3>Add New Child</h3>
+                        <form id="newChildForm">
+                            <div class="form-group">
+                                <label for="childName">Child's Name *</label>
+                                <input type="text" id="childName" name="childName" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="childDob">Date of Birth *</label>
+                                <input type="date" id="childDob" name="childDob" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="childEmail">Email *</label>
+                                <input type="email" id="childEmail" name="childEmail" required>
+                            </div>
+                            
+                            <button type="submit">Create Child</button>
+                            <button type="button" onclick="toggleCreateChildForm()" class="secondary">Cancel</button>
+                        </form>
+                    </div>
+                    
+                    <div id="children-list">
+                        <!-- Children will be populated here -->
+                    </div>
+                </div>
+                
+                <!-- Events Section -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <h2 class="section-title">Your Events</h2>
+                    </div>
+                    
+                    <div id="events-list">
+                        <!-- Events will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Get parent_id from URL query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const parentId = urlParams.get('parent_id');
+        
+        if (!parentId) {
+            alert('Error: parent_id is required in the URL query parameter');
+        }
+        
+        let childrenData = null;
+        let eventsData = null;
+        
+        // Load data on page load
+        window.addEventListener('load', async function() {
+            await loadDashboardData();
+        });
+        
+        async function loadDashboardData() {
+            try {
+                await Promise.all([
+                    loadChildrenData(),
+                    loadEventsData()
+                ]);
+                
+                displayDashboardData();
+                
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = `Error loading dashboard: ${error.message}`;
+            }
+        }
+        
+        async function loadChildrenData() {
+            try {
+                const response = await fetch('https://singular-hopeful-joey.ngrok-free.app/api/children/list', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ parent_id: parseInt(parentId) })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                childrenData = await response.json();
+                
+            } catch (error) {
+                console.error('Error loading children:', error);
+                throw error;
+            }
+        }
+        
+        async function loadEventsData() {
+            try {
+                const response = await fetch('https://singular-hopeful-joey.ngrok-free.app/api/events/list', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ parent_id: parseInt(parentId) })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                eventsData = await response.json();
+                
+            } catch (error) {
+                console.error('Error loading events:', error);
+                throw error;
+            }
+        }
+        
+        function displayDashboardData() {
+            const loading = document.getElementById('loading');
+            const content = document.getElementById('content');
+            
+            loading.style.display = 'none';
+            content.style.display = 'block';
+            
+            displayChildrenList();
+            displayEventsList();
+        }
+        
+        function displayChildrenList() {
+            const childrenList = document.getElementById('children-list');
+            
+            if (!childrenData || !childrenData.children || childrenData.children.length === 0) {
+                childrenList.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">No children found. Add your first child!</p>';
+                return;
+            }
+            
+            childrenList.innerHTML = childrenData.children.map(child => {
+                const dob = new Date(child.dob);
+                const isaExpiry = new Date(child.isa_expiry);
+                const age = Math.floor((new Date() - dob) / (365.25 * 24 * 60 * 60 * 1000));
+                
+                return `
+                    <div class="child-item">
+                        <div class="child-header">
+                            <div class="child-name">${child.child_name}</div>
+                            <div class="child-id">ID: ${child.child_id}</div>
+                        </div>
+                        <div class="child-details">
+                            <div>Age: ${age} years old</div>
+                            <div>Email: ${child.email}</div>
+                            <div>ISA expires: ${isaExpiry.toLocaleDateString()}</div>
+                        </div>
+                        <div class="child-actions">
+                            <a href="../event-creation/index.html?child_id=${child.child_id}" class="button">Create Event</a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function displayEventsList() {
+            const eventsList = document.getElementById('events-list');
+            
+            if (!eventsData || !eventsData.events || eventsData.events.length === 0) {
+                eventsList.innerHTML = '<p style="text-align: center; color: #666; font-style: italic;">No events found. Create an event for your child!</p>';
+                return;
+            }
+            
+            eventsList.innerHTML = eventsData.events.map(event => {
+                const expiresAt = new Date(event.expires_at);
+                const statusClass = event.is_expired ? 'status-expired' : 'status-active';
+                const statusText = event.is_expired ? 'Expired' : 'Active';
+                
+                return `
+                    <div class="event-item">
+                        <div class="event-header">
+                            <div class="event-name">${event.event_name}</div>
+                            <div class="event-status ${statusClass}">${statusText}</div>
+                        </div>
+                        <div class="event-details">
+                            <div>For: ${event.child_name}</div>
+                            <div>Expires: ${expiresAt.toLocaleDateString()}</div>
+                            ${event.days_remaining > 0 ? `<div>Days remaining: ${event.days_remaining}</div>` : ''}
+                        </div>
+                        <div class="event-meta">
+                            <div>Videos: ${event.videos_enabled ? 'Enabled' : 'Disabled'}</div>
+                            <div class="child-actions">
+                                <a href="../event/index.html?event_id=${event.event_id}">View Event</a>
+                                <a href="../messages-review/index.html?event_id=${event.event_id}">View Messages</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function toggleCreateChildForm() {
+            const form = document.getElementById('create-child-form');
+            const isVisible = form.style.display !== 'none';
+            form.style.display = isVisible ? 'none' : 'block';
+        }
+        
+        // Handle new child form submission
+        document.getElementById('newChildForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+            
+            try {
+                const formData = {
+                    parent_id: parseInt(parentId),
+                    child_name: document.getElementById('childName').value,
+                    dob: document.getElementById('childDob').value,
+                    email: document.getElementById('childEmail').value
+                };
+                
+                console.log('Creating child with data:', JSON.stringify(formData, null, 2));
+                
+                const response = await fetch('https://singular-hopeful-joey.ngrok-free.app/api/children/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Child created:', JSON.stringify(data, null, 2));
+                
+                // Show success message
+                document.getElementById('success').style.display = 'block';
+                document.getElementById('success').textContent = `Child "${formData.child_name}" created successfully!`;
+                
+                // Reset form and hide it
+                e.target.reset();
+                toggleCreateChildForm();
+                
+                // Reload children data
+                await loadChildrenData();
+                displayChildrenList();
+                
+            } catch (error) {
+                console.error('Error creating child:', error);
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = `Error creating child: ${error.message}`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+    </script>
+</body>
+</html>

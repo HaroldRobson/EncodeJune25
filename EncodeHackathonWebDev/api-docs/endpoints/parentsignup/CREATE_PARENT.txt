@@ -1,0 +1,55 @@
+# Create Parent
+
+## Request:
+```bash
+curl -X POST http://localhost:8080/api/parents/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "parent_email": "sarah@example.com",
+    "auth0_id": "auth0|abc123def456"
+  }'
+```
+
+## Response:
+```json
+{
+  "parent_id": 456,
+  "parent_email": "sarah@example.com", 
+  "auth0_id": "auth0|abc123def456",
+  "message": "Parent account created successfully"
+}
+```
+
+## Required Fields:
+- `parent_email` - Parent's email address (must be valid email format)
+- `auth0_id` - Auth0 user ID (from client-side Auth0 signup/login)
+
+## Validation Rules:
+- Email must be valid format
+- Email must be unique across all parents
+- Auth0 ID must start with "auth0|"
+- Auth0 ID must be unique across all parents
+
+## Auto-calculated:
+- `parent_id` - Auto-generated primary key
+- `created_at` - Current timestamp
+- `stripe_customer_id` - Set to NULL (will be filled later when setting up payments)
+
+## Error Messages:
+
+**400 Bad Request:**
+- `"Invalid request format"` - Missing required fields or invalid JSON
+- `"Invalid auth0_id format. Should start with 'auth0|'"` - Malformed Auth0 ID
+
+**409 Conflict:**
+- `"A parent with this Auth0 ID already exists"` - Auth0 ID already registered
+- `"A parent with this email already exists"` - Email already in use
+
+**500 Internal Server Error:**
+- `"Failed to create parent account"` - Database insert operation failed
+
+## Usage Notes:
+- This endpoint is called after successful Auth0 signup/login
+- Frontend extracts auth0_id from JWT token and calls this endpoint
+- Parent can later set up Stripe payments via separate endpoint
+- One Auth0 account = One parent account (enforced by unique constraint)

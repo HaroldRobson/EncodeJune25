@@ -1,0 +1,74 @@
+Website Style Guide
+This guide outlines the visual style, colors, and typography for the website to ensure a consistent, warm, and soothing user experience.
+1. Color Palette
+We'll use a palette of warm, earthy, and gentle colors. CSS variables are recommended for easy management.
+Primary Background: A soft, warm off-white.
+--color-background: #FFFBF5;
+Primary Text: A dark, warm gray instead of pure black for easier reading.
+--color-text: #4A443D;
+Primary Action (Buttons, Links): A welcoming and warm terracotta.
+--color-primary: #E87A5D;
+Primary Action (Hover): A slightly deeper terracotta for interaction feedback.
+--color-primary-hover: #D96C4E;
+Accent Color: A gentle, warm gold for secondary elements or highlights.
+--color-accent: #F3B869;
+Borders & Light Dividers: A subtle, light tan.
+--color-border: #EAE2D8;
+Success State: A muted, calming teal.
+--color-success: #70A9A1;
+Error State: A soft, non-alarming red.
+--color-error: #E56B6F;
+Example CSS Implementation:
+Apply to index.html
+}
+2. Typography
+The typography is chosen to be clean, readable, and friendly.
+Headings (h1, h2, h3):
+Font Family: Georgia, 'Times New Roman', Times, serif
+Style: A classic, warm serif font that feels established and calm.
+Body Text (p, li, etc.):
+Font Family: 'Helvetica Neue', Helvetica, Arial, sans-serif
+Style: A clean, modern sans-serif for high readability.
+Example CSS Implementation:
+Apply to index.html
+}
+3. UI Elements
+UI elements should be soft, rounded, and inviting.
+Buttons:
+Background: var(--color-primary)
+Text Color: #FFFFFF (White)
+Border: None.
+Corners: Softly rounded (border-radius: 8px;).
+Shadow: A subtle shadow to lift it off the page.
+Hover State: Background changes to var(--color-primary-hover).
+Input Fields:
+Border: 1px solid var(--color-border).
+Background: white.
+Corners: Softly rounded (border-radius: 8px;).
+Focus State: Border color changes to var(--color-primary).
+Containers/Cards:
+Background: white or a very light shade like var(--color-background).
+Corners: More pronounced rounding (border-radius: 12px;).
+Shadow: A gentle, diffused shadow to create depth. (box-shadow: 0 4px 12px rgba(0,0,0,0.08);).
+Example CSS Implementation:
+button {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+button:hover {
+    background-color: var(--color-primary-hover);
+}
+
+.card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}

@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  db:
+    build: ./docker/db
+    container_name: donations_db
+    environment:
+      POSTGRES_DB: donations
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      # Persist data between container restarts
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d donations"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: ./docker/api
+    container_name: donations_api
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: password
+      DB_NAME: donations
+      PORT: 8080
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/var/uploads
+
+volumes:
+  postgres_data:

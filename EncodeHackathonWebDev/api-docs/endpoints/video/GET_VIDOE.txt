@@ -1,0 +1,65 @@
+Get Video
+Request:
+bashcurl http://localhost:8080/videos/123_birthday_message.mp4
+Response:
+Returns the video file with appropriate headers for browser playback.
+URL Format:
+
+Base URL: http://localhost:8080/videos/
+Filename: From video upload response (video_url)
+Example: http://localhost:8080/videos/1640995200_grandma_message.mp4
+
+Supported Formats:
+
+.mp4 (recommended)
+.mov
+.avi
+.webm
+
+Response Headers:
+
+Content-Type: video/mp4
+Accept-Ranges: bytes (enables video seeking)
+Cache-Control: public, max-age=3600 (1 hour cache)
+
+Error Messages:
+400 Bad Request:
+
+"Invalid filename" - Filename contains illegal characters (../, , etc.)
+"Invalid file type" - File extension not allowed
+
+404 Not Found:
+
+"Video not found" - File doesn't exist on server
+
+Security Features:
+
+Path traversal protection - Prevents access to files outside uploads directory
+File type validation - Only serves video files
+Filename sanitization - Blocks dangerous characters
+
+Usage in Frontend:
+html<!-- Direct video playback -->
+<video controls width="400">
+  <source src="http://localhost:8080/videos/123_birthday_message.mp4" type="video/mp4">
+  Your browser does not support video playback.
+</video>
+
+<!-- Or as download link -->
+<a href="http://localhost:8080/videos/123_birthday_message.mp4" target="_blank">
+  Watch Video Message
+</a>
+Integration with Upload:
+
+Upload video: POST /api/uploads/video → Returns video_url
+Save in donation: Include video_url in donation creation
+View video: Use this endpoint to serve the actual file
+Parent approval: Parents can click video links to watch before approving
+
+Production Notes:
+
+Consider CDN for better video delivery
+Add authentication if videos should be private
+Monitor disk usage for uploaded videos
+Consider video compression for large files
+

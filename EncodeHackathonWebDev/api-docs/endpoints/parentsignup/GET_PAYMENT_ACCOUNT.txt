@@ -1,0 +1,120 @@
+# Get Payment Accounts Status
+
+## Request:
+```bash
+curl -X POST http://localhost:8080/api/payments/status \
+  -H "Content-Type: application/json" \
+  -d '{
+    "parent_id": 123
+  }'
+```
+
+## Response (No Account):
+```json
+{
+  "parent_id": 123,
+  "has_account": false,
+  "payment_account": null,
+  "status": "no_account",
+  "message": "No payment account set up. Create a Stripe account to start receiving donations."
+}
+```
+
+## Response (Account Pending Onboarding):
+```json
+{
+  "parent_id": 123,
+  "has_account": true,
+  "payment_account": {
+    "account_id": 456,
+    "stripe_connect_account_id": "acct_1ABCDEfghijklmno",
+    "onboarding_complete": false,
+    "created_at": "2025-06-21T10:30:00Z"
+  },
+  "status": "pending_onboarding",
+  "message": "Complete Stripe onboarding to start receiving donations."
+}
+```
+
+## Response (Account Ready):
+```json
+{
+  "parent_id": 123,
+  "has_account": true,
+  "payment_account": {
+    "account_id": 456,
+    "stripe_connect_account_id": "acct_1ABCDEfghijklmno",
+    "onboarding_complete": true,
+    "created_at": "2025-06-21T10:30:00Z"
+  },
+  "status": "ready",
+  "message": "Payment account is ready to receive donations."
+}
+```
+
+## Required Fields:
+- `parent_id` - Parent's database ID (from authenticated session)
+
+## Status Types:
+- **`no_account`** - Parent hasn't set up Stripe yet
+- **`pending_onboarding`** - Stripe account created but onboarding incomplete
+- **`ready`** - Fully set up and can receive donations
+
+## Response Fields:
+- `parent_id` - Parent who owns the account
+- `has_account` - Boolean indicating if Stripe account exists
+- `payment_account` - Account details (null if no account)
+- `status` - Current account status (see types above)
+- `message` - Human-readable status description
+
+## Frontend Dashboard Usage:
+```javascript
+// Check payment setup status
+fetch('/api/payments/status', {
+  method: 'POST',
+  body: JSON.stringify({ parent_id: parentId })
+})
+.then(response => response.json())
+.then(data => {
+  switch(data.status) {
+    case 'no_account':
+      showSetupPaymentsButton();
+      break;
+    case 'pending_onboarding':
+      showCompleteOnboardingButton(data.payment_account.stripe_connect_account_id);
+      break;
+    case 'ready':
+      showPaymentsReady();
+      enableDonationFeatures();
+      break;
+  }
+});
+```
+
+## Error Messages:
+
+**400 Bad Request:**
+- `"Invalid request format"` - Missing parent_id or invalid JSON
+
+**404 Not Found:**
+- `"Parent not found"` - Parent ID doesn't exist
+
+**500 Internal Server Error:**
+- `"Database query failed"` - Database connection issues
+- `"Failed to query payment account"` - Query operation failed
+
+## Integration with Other Endpoints:
+- Use with `/api/parents/get` to build complete parent dashboard
+- Status determines which payment setup buttons to show
+- `stripe_connect_account_id` needed for onboarding link creation
+
+## Dashboard Flow:
+1. Parent logs in → Call `/api/parents/get`
+2. Get payment status → Call this endpoint
+3. Show appropriate UI based on status:
+   - No account: "Set up payments" button
+   - Pending: "Complete verification" button  
+   - Ready: Show donation features
+
+## Perfect for Parent Portal:
+This endpoint gives you everything needed to build a clean parent dashboard that shows exactly what payment setup steps are needed.

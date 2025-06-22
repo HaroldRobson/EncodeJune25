@@ -1,0 +1,61 @@
+# Get Parent
+
+## Request:
+```bash
+curl -X POST http://localhost:8080/api/parents/get \
+  -H "Content-Type: application/json" \
+  -d '{
+    "auth0_id": "auth0|abc123def456"
+  }'
+```
+
+## Response:
+```json
+{
+  "parent_id": 123,
+  "parent_email": "sarah@example.com",
+  "auth0_id": "auth0|abc123def456",
+  "stripe_customer_id": "cus_sample123",
+  "created_at": "2025-06-21T10:30:00Z"
+}
+```
+
+## Response (No Stripe Account):
+```json
+{
+  "parent_id": 456,
+  "parent_email": "newparent@example.com", 
+  "auth0_id": "auth0|xyz789ghi012",
+  "stripe_customer_id": null,
+  "created_at": "2025-06-21T11:45:00Z"
+}
+```
+
+## Required Fields:
+- `auth0_id` - Auth0 user ID (from JWT token)
+
+## Response Fields:
+- `parent_id` - Parent's database ID
+- `parent_email` - Parent's email address
+- `auth0_id` - Auth0 user identifier
+- `stripe_customer_id` - Stripe customer ID (null if not set up yet)
+- `created_at` - Account creation timestamp
+
+## Error Messages:
+
+**400 Bad Request:**
+- `"Invalid request format"` - Missing auth0_id or invalid JSON
+- `"Auth0 ID is required"` - Empty auth0_id provided
+
+**404 Not Found:**
+- `"Parent not found"` - No parent exists with this Auth0 ID
+
+**500 Internal Server Error:**
+- `"Database query failed"` - Database connection issues
+
+## Usage Notes:
+- This endpoint is called after Auth0 login to get parent profile
+- Frontend extracts auth0_id from JWT token and calls this endpoint
+- Used to check if parent has completed Stripe setup (stripe_customer_id)
+- Returns all parent account information needed for dashboard
+- Safe to call repeatedly - no side effects

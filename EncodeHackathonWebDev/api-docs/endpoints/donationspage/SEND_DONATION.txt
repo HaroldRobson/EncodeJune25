@@ -1,0 +1,38 @@
+# Create Donation
+
+## Request:
+```bash
+curl -X POST http://localhost:8080/api/donations/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "event_id": 1,
+    "donor_name": "Uncle Bob",
+    "amount_pence": 500,
+    "message": "Happy birthday Emma! 🎂",
+    "video_address": "https://example.com/video.mp4"
+  }'
+```
+
+## Response:
+```json
+{
+  "donation_id": 123,
+  "status": "pending_payment",
+  "message": "Donation created successfully. Payment processing will be implemented next."
+}
+```
+
+## Required Fields:
+- `event_id` - Which birthday event
+- `donor_name` - Who's donating
+- `amount_pence` - Amount in pence (minimum 100 = £1.00)
+
+## Optional Fields:
+- `message` - Personal message to child
+- `video_address` - Video message URL (only if event allows videos)
+
+## Errors:
+- 400: Invalid data (missing fields, amount too small)
+- 404: Event not found
+- 410: Event expired
+- 503: Payment not set up yet

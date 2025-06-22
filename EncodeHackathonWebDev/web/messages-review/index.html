@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parent Approval - Donations Review</title>
+    <style>
+        /* Shared styles for encode website - Warm Style Guide */
+
+:root {
+    --color-background: #FFFBF5;
+    --color-text: #4A443D;
+    --color-primary: #E87A5D;
+    --color-primary-hover: #D96C4E;
+    --color-accent: #F3B869;
+    --color-border: #EAE2D8;
+    --color-success: #70A9A1;
+    --color-error: #E56B6F;
+}
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: var(--color-background);
+    color: var(--color-text);
+    line-height: 1.6;
+}
+
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+h1, h2, h3 {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    color: var(--color-text);
+    margin-bottom: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.2em;
+}
+
+h2 {
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+
+/* Summary stats */
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: rgba(243, 184, 105, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid var(--color-accent);
+}
+
+.stat-number {
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--color-primary);
+    display: block;
+}
+
+.stat-label {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text);
+    margin-top: 5px;
+}
+
+/* Donation list */
+.donation-list {
+    margin-top: 30px;
+}
+
+.donation-item {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+.donation-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.donation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.donor-name {
+    font-size: 1.2em;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.amount {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: var(--color-primary);
+}
+
+.donation-message {
+    background: rgba(234, 226, 216, 0.3);
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-style: italic;
+    border-left: 3px solid var(--color-accent);
+}
+
+.donation-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: #666;
+}
+
+.donation-date {
+    color: var(--color-text);
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-approved {
+    background: rgba(112, 169, 161, 0.2);
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
+}
+
+.status-pending {
+    background: rgba(243, 184, 105, 0.2);
+    color: #8b6b2d;
+    border: 1px solid var(--color-accent);
+}
+
+.video-link {
+    color: var(--color-primary);
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.video-link:hover {
+    color: var(--color-primary-hover);
+    text-decoration: underline;
+}
+
+/* Button styles */
+button {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background-color 0.2s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+button:hover {
+    background-color: var(--color-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+button:disabled {
+    background-color: var(--color-border);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+button.success {
+    background-color: var(--color-success);
+}
+
+button.success:hover {
+    background-color: #5f9a92;
+}
+
+button.secondary {
+    background-color: var(--color-border);
+    color: var(--color-text);
+}
+
+button.secondary:hover {
+    background-color: #d4c8bc;
+}
+
+/* Loading and error states */
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--color-text);
+    font-style: italic;
+}
+
+.error {
+    background-color: rgba(229, 107, 111, 0.1);
+    border: 1px solid var(--color-error);
+    color: #8b2d31;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.no-donations {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
+.no-donations h3 {
+    color: var(--color-text);
+    margin-bottom: 10px;
+}
+
+.no-donations p {
+    font-style: italic;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        padding: 20px;
+    }
+    
+    .summary-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .donation-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .donation-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
+
+/* Toggle switch styles */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-border);
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: var(--color-success);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+.toggle-switch:disabled .toggle-slider {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.approval-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--color-border);
+}
+
+.approval-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Donations Review</h1>
+        
+        <div id="loading" class="loading">
+            Loading donations...
+        </div>
+        
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div id="content" style="display: none;">
+            <div id="summary-stats" class="summary-stats">
+                <!-- Summary stats will be populated here -->
+            </div>
+            
+            <div id="donation-list" class="donation-list">
+                <!-- Donations will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application state
+        let appState = {
+            eventId: null,
+            donationsData: null,
+            isLoading: true,
+            error: null
+        };
+
+        // DOM elements
+        const elements = {
+            loading: document.getElementById('loading'),
+            error: document.getElementById('error'),
+            content: document.getElementById('content'),
+            summaryStats: document.getElementById('summary-stats'),
+            donationList: document.getElementById('donation-list')
+        };
+
+        // Initialize the application
+        async function init() {
+            try {
+                // Get event_id from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                appState.eventId = urlParams.get('event_id');
+                
+                if (!appState.eventId) {
+                    throw new Error('event_id is required in the URL query parameter');
+                }
+
+                console.log('Initializing with event_id:', appState.eventId);
+                
+                // Load donations data
+                await loadDonations();
+                
+                // Render the page
+                render();
+                
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showError(error.message);
+            }
+        }
+
+        // Load donations from API
+        async function loadDonations() {
+            try {
+                console.log('Loading donations for event_id:', appState.eventId);
+                
+                const response = await fetch('https://singular-hopeful-joey.ngrok-free.app/api/donations/list', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        event_id: parseInt(appState.eventId) 
+                    })
+                });
+
+                console.log('API Response status:', response.status);
+
+                if (response.status === 404) {
+                    throw new Error('Event not found');
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Received donations data:', data);
+                
+                // Store in app state
+                appState.donationsData = data;
+                appState.isLoading = false;
+                appState.error = null;
+                
+            } catch (error) {
+                console.error('Error loading donations:', error);
+                appState.isLoading = false;
+                appState.error = error.message;
+                throw error;
+            }
+        }
+
+        // Render the entire page based on current state
+        function render() {
+            if (appState.isLoading) {
+                showLoading();
+                return;
+            }
+
+            if (appState.error) {
+                showError(appState.error);
+                return;
+            }
+
+            if (!appState.donationsData) {
+                showError('No data available');
+                return;
+            }
+
+            showContent();
+        }
+
+        // Show loading state
+        function showLoading() {
+            elements.loading.style.display = 'block';
+            elements.error.style.display = 'none';
+            elements.content.style.display = 'none';
+        }
+
+        // Show error state
+        function showError(message) {
+            elements.loading.style.display = 'none';
+            elements.error.style.display = 'block';
+            elements.content.style.display = 'none';
+            elements.error.textContent = `Error: ${message}`;
+        }
+
+        // Show main content
+        function showContent() {
+            elements.loading.style.display = 'none';
+            elements.error.style.display = 'none';
+            elements.content.style.display = 'block';
+            
+            // Update page title
+            document.title = `Donations Review - ${appState.donationsData.event_name}`;
+            
+            // Render components
+            renderSummaryStats();
+            renderDonationsList();
+        }
+
+        // Render summary statistics
+        function renderSummaryStats() {
+            const data = appState.donationsData;
+            
+            const stats = [
+                {
+                    number: data.total_donations,
+                    label: 'Total Donations'
+                },
+                {
+                    number: data.approved_donations,
+                    label: 'Approved'
+                },
+                {
+                    number: data.pending_donations,
+                    label: 'Pending Review'
+                },
+                {
+                    number: `$${(data.total_amount_pence / 100).toFixed(2)}`,
+                    label: 'Total Amount'
+                },
+                {
+                    number: `$${(data.approved_amount_pence / 100).toFixed(2)}`,
+                    label: 'Approved Amount'
+                }
+            ];
+
+            elements.summaryStats.innerHTML = stats.map(stat => `
+                <div class="stat-card">
+                    <span class="stat-number">${stat.number}</span>
+                    <div class="stat-label">${stat.label}</div>
+                </div>
+            `).join('');
+        }
+
+        // Render donations list
+        function renderDonationsList() {
+            const data = appState.donationsData;
+            
+            // Handle empty donations
+            if (!data.donations || data.donations.length === 0) {
+                elements.donationList.innerHTML = `
+                    <div class="no-donations">
+                        <h3>No donations yet</h3>
+                        <p>When people start donating to ${data.event_name}, they'll appear here for your review.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Render donation items
+            elements.donationList.innerHTML = data.donations.map(donation => 
+                renderDonationItem(donation)
+            ).join('');
+        }
+
+        // Render individual donation item
+        function renderDonationItem(donation) {
+            const donationDate = new Date(donation.created_at);
+            const amount = (donation.amount_pence / 100).toFixed(2);
+            const statusClass = donation.approved ? 'status-approved' : 'status-pending';
+            const statusText = donation.approved ? 'Approved' : 'Pending';
+            
+            return `
+                <div class="donation-item" data-donation-id="${donation.id}">
+                    <div class="donation-header">
+                        <div class="donor-name">${donation.donor_name}</div>
+                        <div class="amount">$${amount}</div>
+                    </div>
+                    
+                    ${donation.message ? `<div class="donation-message">"${donation.message}"</div>` : ''}
+                    
+                    <div class="donation-meta">
+                        <div class="donation-date">${donationDate.toLocaleDateString()} at ${donationDate.toLocaleTimeString()}</div>
+                        <div class="donation-status">
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                            ${donation.video_address ? `<a href="${donation.video_address.replace('http://localhost:8080', 'https://singular-hopeful-joey.ngrok-free.app')}" target="_blank" class="video-link">📹 Watch Video</a>` : ''}
+
+                        </div>
+                    </div>
+                    
+                    <div class="approval-controls">
+                        <span class="approval-label">Approve Donation:</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" 
+                                   id="toggle-${donation.id}" 
+                                   ${donation.approved ? 'checked' : ''} 
+                                   onchange="handleApprovalToggle(${donation.id}, this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Handle approval toggle
+        async function handleApprovalToggle(donationId, approved) {
+            try {
+                console.log(`Toggling approval for donation ${donationId} to ${approved}`);
+                
+                // Call API to update approval
+                await updateDonationApproval(donationId, approved);
+                
+                // Update local state
+                const donation = appState.donationsData.donations.find(d => d.id === donationId);
+                if (donation) {
+                    donation.approved = approved;
+                    
+                    // Update summary stats
+                    if (approved) {
+                        appState.donationsData.approved_donations++;
+                        appState.donationsData.pending_donations--;
+                        appState.donationsData.approved_amount_pence += donation.amount_pence;
+                    } else {
+                        appState.donationsData.approved_donations--;
+                        appState.donationsData.pending_donations++;
+                        appState.donationsData.approved_amount_pence -= donation.amount_pence;
+                    }
+                }
+                
+                // Re-render to update UI
+                render();
+                
+            } catch (error) {
+                console.error('Error updating approval:', error);
+                alert(`Error updating donation: ${error.message}`);
+                
+                // Reset the toggle to its previous state
+                const toggle = document.getElementById(`toggle-${donationId}`);
+                if (toggle) {
+                    toggle.checked = !approved;
+                }
+            }
+        }
+
+        // Update donation approval via API
+        async function updateDonationApproval(donationId, approved) {
+            const requestBody = {
+                donation_id: parseInt(donationId),
+                approved: approved
+            };
+
+            console.log('Sending approval request:', requestBody);
+
+            const response = await fetch('https://singular-hopeful-joey.ngrok-free.app/api/donations/approve', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('Approval response:', data);
+            
+            return data;
+        }
+
+        // Start the application when DOM is loaded
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>

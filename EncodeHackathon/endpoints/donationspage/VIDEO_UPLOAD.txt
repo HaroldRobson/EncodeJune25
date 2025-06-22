@@ -1,0 +1,35 @@
+# Video Upload
+
+## Upload Video:
+```bash
+curl -X POST http://localhost:8080/api/uploads/video \
+  -F "video=@birthday_message.mp4"
+```
+
+## Response:
+```json
+{
+  "video_url": "http://localhost:8080/videos/123_birthday_message.mp4",
+  "message": "Video uploaded successfully"
+}
+```
+
+## Serve Video:
+```bash
+curl http://localhost:8080/videos/123_birthday_message.mp4
+```
+*Returns the video file (can be used in HTML video tags)*
+
+## File Requirements:
+- **Max size**: 50MB
+- **Formats**: .mp4, .mov, .avi, .webm
+- **Upload method**: multipart/form-data with field name "video"
+
+## Errors:
+- 400: No file / too large / invalid format
+- 404: Video not found
+- 500: Server storage error
+
+## Usage in Donation:
+1. Upload video → get `video_url`
+2. Include `video_url` in donation creation request

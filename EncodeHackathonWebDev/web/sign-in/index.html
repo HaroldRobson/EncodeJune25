@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Letter Ahead - Sign In</title>
+    <script src="https://cdn.auth0.com/js/auth0-spa-js/2.0/auth0-spa-js.production.js"></script>
+    <style>
+        :root {
+            --color-background: #FFFBF5;
+            --color-text: #4A443D;
+            --color-primary: #E87A5D;
+            --color-primary-hover: #D96C4E;
+            --color-accent: #F3B869;
+            --color-border: #EAE2D8;
+            --color-success: #70A9A1;
+            --color-error: #E56B6F;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--color-background);
+            color: var(--color-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: url('login_background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 251, 245, 0.85);
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 450px;
+            width: 90%;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        h1 {
+            font-family: Georgia, 'Times New Roman', Times, serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #6B5D52;
+            margin-bottom: 2rem;
+        }
+
+        .welcome-message {
+            font-size: 1rem;
+            color: var(--color-text);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        button {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        button:hover {
+            background-color: var(--color-primary-hover);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            margin: 2rem 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid var(--color-border);
+            border-top: 3px solid var(--color-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .status-message.show {
+            display: block;
+        }
+
+        .status-message.success {
+            background-color: #E8F5F3;
+            color: var(--color-success);
+            border: 1px solid var(--color-success);
+        }
+
+        .status-message.error {
+            background-color: #FDF2F2;
+            color: var(--color-error);
+            border: 1px solid var(--color-error);
+        }
+
+        .footer {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: #8B7355;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                width: 95%;
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 30px 25px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    
+    <div class="container">
+        <div class="card">
+            <h1>A Letter Ahead</h1>
+            <p class="subtitle">Birthday Donations Made Simple</p>
+            
+            <div class="welcome-message">
+                Create magical birthday experiences for your children. Friends and family can contribute to their future with heartfelt messages and donations that grow into something special.
+            </div>
+
+            <button id="loginBtn" onclick="handleLogin()">
+                Sign In / Create Account
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p id="loadingText">Setting up your account...</p>
+            </div>
+
+            <div class="status-message" id="statusMessage"></div>
+
+            <div class="footer">
+                <p>Secure authentication powered by Auth0</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let auth0Client;
+        const API_BASE = 'https://singular-hopeful-joey.ngrok-free.app'; // Change to your API URL
+        
+        // Store parent data in session
+        const SESSION_KEY = 'letterahead_parent_data';
+
+        // Initialize Auth0
+        async function initAuth0() {
+            auth0Client = new auth0.Auth0Client({
+                domain: 'dev-1j1laxnkr7v5eef8.us.auth0.com',
+                clientId: 'a5cqTLsgKYUlYJyuZB4zzbDWWdzwAmtl',
+                authorizationParams: {
+                    redirect_uri: window.location.origin + '/sign-in/'
+                },
+                cacheLocation: 'localstorage'
+            });
+
+            // Check if we're coming back from Auth0 or Stripe
+            await handleCallback();
+        }
+
+        // Handle the callback from Auth0 or Stripe
+        async function handleCallback() {
+            console.log('=== CALLBACK DEBUG ===');
+            console.log('Current URL:', window.location.href);
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const stripeStatus = urlParams.get('stripe_status');
+            const authCode = urlParams.get('code');
+            const authError = urlParams.get('error');
+            
+            if (authError) {
+                console.error('Auth0 error:', authError);
+                showMessage(`Login failed: ${urlParams.get('error_description') || authError}`, 'error');
+                return;
+            }
+            
+            if (stripeStatus === 'success') {
+                // Coming back from successful Stripe onboarding
+                await handleStripeSuccess();
+            } else if (stripeStatus === 'refresh') {
+                // Stripe needs more info
+                await handleStripeRefresh();
+            } else if (authCode) {
+                // Coming back from Auth0
+                await handleAuth0Return();
+            }
+        }
+
+        // Handle Auth0 login
+        async function handleLogin() {
+            try {
+                setLoading(true, 'Redirecting to login...');
+                await auth0Client.loginWithRedirect({
+                    authorizationParams: {
+                        prompt: 'login'
+                    }
+                });
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage('Login failed. Please try again.', 'error');
+                setLoading(false);
+            }
+        }
+
+        // Handle return from Auth0
+        async function handleAuth0Return() {
+            try {
+                console.log('Processing Auth0 callback...');
+                setLoading(true, 'Processing login...');
+                
+                await auth0Client.handleRedirectCallback();
+                const user = await auth0Client.getUser();
+                console.log('User authenticated:', user);
+                
+                if (user) {
+                    // Call the parent create/check endpoint
+                    setLoading(true, 'Checking account status...');
+                    
+                    const response = await fetch(`${API_BASE}/api/parents/create`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            parent_email: user.email,
+                            auth0_id: user.sub
+                        })
+                    });
+
+                    if (response.status === 409) {
+                        // Existing user - we need to extract parent_id from the error response
+                        // Since the API doesn't have a get-by-auth0 endpoint, we'll need to handle this differently
+                        console.log('Existing user detected');
+                        
+                        // For now, we'll need to store parent_id when creating the account
+                        // Or modify the backend to return parent_id in 409 response
+                        // Let's check payment status using a stored parent_id or prompt for login
+                        
+                        showMessage('Account already exists. Checking payment setup...', 'success');
+                        
+                        // Try to get parent_id from localStorage (if we stored it before)
+                        const storedParentId = localStorage.getItem('letterahead_parent_id');
+                        
+                        if (storedParentId) {
+                            // Check payment status
+                            const statusResponse = await fetch(`${API_BASE}/api/payments/status`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    parent_id: parseInt(storedParentId)
+                                })
+                            });
+                            
+                            if (statusResponse.ok) {
+                                const statusData = await statusResponse.json();
+                                console.log('Payment status:', statusData);
+                                
+                                if (statusData.status === 'ready') {
+                                    // Fully set up - go to dashboard
+                                    showMessage('Welcome back! Redirecting to your dashboard...', 'success');
+                                    setTimeout(() => {
+                                        window.location.href = `/parent-portal/?parent_id=${storedParentId}`;
+                                    }, 1500);
+                                } else if (statusData.status === 'pending_onboarding') {
+                                    // Need to complete onboarding
+                                    await continueStripeOnboarding(parseInt(storedParentId));
+                                } else {
+                                    // No account - start setup
+                                    await startStripeOnboarding(parseInt(storedParentId));
+                                }
+                            } else {
+                                // Can't verify status, just go to dashboard
+                                window.location.href = `/parent-portal/`;
+                            }
+                        } else {
+                            // No stored parent_id, redirect to dashboard and let them handle it
+                            window.location.href = `/parent-portal/`;
+                        }
+                        
+                    } else if (response.ok) {
+                        // New user created
+                        const data = await response.json();
+                        console.log('New user created:', data);
+                        
+                        // Store parent data including parent_id for future use
+                        sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+                            parent_id: data.parent_id,
+                            auth0_id: user.sub,
+                            email: user.email
+                        }));
+                        
+                        // Also store parent_id in localStorage for returning users
+                        localStorage.setItem('letterahead_parent_id', data.parent_id.toString());
+                        
+                        // Get Stripe onboarding URL using fake account for development
+                        showMessage('Welcome! Setting up your payment account...', 'success');
+                        await startStripeOnboarding(data.parent_id);
+                        
+                    } else {
+                        // Unexpected error
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Failed to create/check parent account');
+                    }
+                }
+            } catch (error) {
+                console.error('Auth0 callback error:', error);
+                showMessage('Login failed. Please try again.', 'error');
+                setLoading(false);
+            }
+        }
+
+        // Continue incomplete Stripe onboarding (fake version for development)
+        async function continueStripeOnboarding(parentId) {
+            try {
+                setLoading(true, 'Resuming payment setup...');
+                
+                // For development: simulate Stripe onboarding continuation
+                showMessage('Resuming payment setup...', 'success');
+                
+                // Generate a fake Stripe account ID
+                const fakeStripeAccountId = generateStripeAccountId();
+                
+                // Store the fake account ID
+                sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+                    parent_id: parentId,
+                    stripe_account_id: fakeStripeAccountId
+                }));
+                
+                // Simulate redirect
+                setTimeout(() => {
+                    window.location.href = `${window.location.origin}/sign-in/?stripe_status=success&account=${fakeStripeAccountId}`;
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Stripe onboarding error:', error);
+                showMessage('Failed to resume payment setup. Please contact support.', 'error');
+                setLoading(false);
+            }
+        }
+
+        // Generate a fake Stripe Connect account ID
+        function generateStripeAccountId() {
+            // Generate UUID v4
+            const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            
+            // Stripe Connect account IDs start with 'acct_' followed by 16 alphanumeric characters
+            const stripeId = 'acct_' + uuid.replace(/-/g, '').substring(0, 16);
+            return stripeId;
+        }
+
+        // Start new Stripe onboarding (fake version for development)
+        async function startStripeOnboarding(parentId) {
+            try {
+                setLoading(true, 'Starting payment setup...');
+                
+                // For development: simulate Stripe onboarding
+                showMessage('Setting up payment account...', 'success');
+                
+                // Generate a fake Stripe account ID
+                const fakeStripeAccountId = generateStripeAccountId();
+                
+                // Save the Stripe account to the backend
+                const saveResponse = await fetch(`${API_BASE}/api/payments/save-account`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        parent_id: parentId,
+                        stripe_connect_account_id: fakeStripeAccountId
+                    })
+                });
+                
+                if (saveResponse.ok) {
+                    const saveData = await saveResponse.json();
+                    console.log('Stripe account saved:', saveData);
+                    
+                    // Store the account info
+                    const parentData = JSON.parse(sessionStorage.getItem(SESSION_KEY) || '{}');
+                    parentData.stripe_account_id = fakeStripeAccountId;
+                    sessionStorage.setItem(SESSION_KEY, JSON.stringify(parentData));
+                    
+                    // Simulate redirect to Stripe and back
+                    showMessage('Redirecting to complete setup...', 'success');
+                    setTimeout(() => {
+                        window.location.href = `${window.location.origin}/sign-in/?stripe_status=success&account=${fakeStripeAccountId}`;
+                    }, 2000);
+                } else {
+                    const errorData = await saveResponse.json();
+                    throw new Error(errorData.error || 'Failed to save payment account');
+                }
+                
+            } catch (error) {
+                console.error('Stripe setup error:', error);
+                showMessage('Failed to start payment setup. Please contact support.', 'error');
+                setLoading(false);
+            }
+        }
+
+        // Handle successful Stripe return (fake version for development)
+        async function handleStripeSuccess() {
+            try {
+                setLoading(true, 'Completing setup...');
+                
+                // Get the fake account ID from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const accountId = urlParams.get('account');
+                
+                // Get stored parent data
+                const storedData = sessionStorage.getItem(SESSION_KEY);
+                if (!storedData) {
+                    throw new Error('No parent data found');
+                }
+                
+                const parentData = JSON.parse(storedData);
+                console.log('Completing setup for parent:', parentData.parent_id);
+                
+                // Call the onboarding complete endpoint with the fake Stripe account ID
+                const response = await fetch(`${API_BASE}/api/payments/onboarding-complete`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        stripe_connect_account_id: accountId || parentData.stripe_account_id
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Onboarding complete response:', data);
+                    
+                    // Clear stored data
+                    sessionStorage.removeItem(SESSION_KEY);
+                    
+                    showMessage('Setup complete! Welcome to A Letter Ahead!', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = `/parent-portal/?parent_id=${data.parent_id}`;
+                    }, 2000);
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to complete setup');
+                }
+                
+            } catch (error) {
+                console.error('Stripe success handling error:', error);
+                showMessage('Setup may be incomplete. Please try logging in again.', 'error');
+                setLoading(false);
+            }
+        }
+
+        // Handle Stripe refresh/incomplete
+        async function handleStripeRefresh() {
+            try {
+                setLoading(true, 'Additional information needed...');
+                
+                const storedData = sessionStorage.getItem(SESSION_KEY);
+                if (!storedData) {
+                    showMessage('Session expired. Please login again.', 'error');
+                    setLoading(false);
+                    return;
+                }
+                
+                const parentData = JSON.parse(storedData);
+                
+                // Get a new onboarding link
+                await continueStripeOnboarding(parentData.parent_id);
+                
+            } catch (error) {
+                console.error('Stripe refresh error:', error);
+                showMessage('Failed to continue setup. Please try again.', 'error');
+                setLoading(false);
+            }
+        }
+
+        // Utility functions
+        function setLoading(show, text = 'Loading...') {
+            const loading = document.getElementById('loading');
+            const loadingText = document.getElementById('loadingText');
+            const loginBtn = document.getElementById('loginBtn');
+
+            if (show) {
+                loading.classList.add('show');
+                loadingText.textContent = text;
+                loginBtn.disabled = true;
+            } else {
+                loading.classList.remove('show');
+                loginBtn.disabled = false;
+            }
+        }
+
+        function showMessage(message, type) {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type} show`;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusMessage.classList.remove('show');
+                }, 5000);
+            }
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initAuth0);
+    </script>
+</body>
+</html>

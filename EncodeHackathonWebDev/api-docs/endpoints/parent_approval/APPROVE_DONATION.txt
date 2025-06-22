@@ -1,0 +1,54 @@
+# Approve/Reject Donation
+
+## Request:
+```bash
+curl -X POST http://localhost:8080/api/donations/approve \
+  -H "Content-Type: application/json" \
+  -d '{
+    "donation_id": 123,
+    "approved": true
+  }'
+```
+
+## Response:
+```json
+{
+  "donation_id": 123,
+  "approved": true,
+  "donor_name": "Uncle Bob",
+  "message": "Donation approved successfully"
+}
+```
+
+## Required Fields:
+- `donation_id` - The donation to approve/reject
+- `approved` - true to approve, false to reject
+
+## Response Fields:
+- `donation_id` - ID of the donation
+- `approved` - New approval status
+- `donor_name` - Name of the donor
+- `message` - Success message
+
+## Approval Logic:
+- Can toggle between approved/rejected states
+- If already in requested state, returns success message
+- Updates `updated_at` timestamp
+
+## Error Messages:
+
+**400 Bad Request:**
+- `"Invalid request format"` - Missing required fields or invalid JSON
+
+**404 Not Found:**
+- `"Donation not found"` - Donation ID doesn't exist
+
+**500 Internal Server Error:**
+- `"Database query failed"` - Database connection issues
+- `"Failed to update donation status"` - Update operation failed
+
+## Special Responses:
+
+**200 OK (No Change):**
+- `"Donation is already approved"` - When trying to approve already approved donation
+- `"Donation is already rejected"` - When trying to reject already rejected donation

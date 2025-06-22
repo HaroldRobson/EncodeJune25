@@ -1,0 +1,47 @@
+# Get Parent's Children
+
+## Request:
+```bash
+curl -X POST http://localhost:8080/api/children/list \
+  -H "Content-Type: application/json" \
+  -d '{"parent_id": 1}'
+```
+
+## Response:
+```json
+{
+  "children": [
+    {
+      "child_id": 1,
+      "dob": "2017-07-15T00:00:00Z",
+      "parent_id": 1,
+      "email": "emma@example.com",
+      "isa_expiry": "2035-07-15T00:00:00Z",
+      "created_at": "2025-06-20T17:23:56Z",
+      "child_name": "Emma"
+    },
+    {
+      "child_id": 2,
+      "dob": "2019-08-22T00:00:00Z",
+      "parent_id": 1,
+      "email": "sophie@example.com",
+      "isa_expiry": "2037-08-22T00:00:00Z",
+      "created_at": "2025-06-20T18:45:12Z",
+      "child_name": "Sophie"
+    }
+  ],
+  "count": 2
+}
+```
+
+## Required Fields:
+- `parent_id` - The parent's ID (from Auth0 JWT token)
+
+## Response Fields:
+- `children` - Array of child objects
+- `count` - Total number of children
+- Children sorted alphabetically by name
+
+## Errors:
+- 400: Invalid request format or missing parent_id
+- 500: Database error
